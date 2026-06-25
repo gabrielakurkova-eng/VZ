@@ -961,6 +961,44 @@ async function financeAI(){
   finally{ setBusy(btn,false); }
 }
 
+/* ============================================================ ARES (registr ekonomických subjektů) ============================================================ */
+function mapAresForm(kod){
+  const m={ '706':'spolek','736':'spolek','141':'ops','161':'ustav','117':'nadace','118':'nadace',
+    '651':'prispevkova','331':'cirkevni','721':'cirkevni','722':'cirkevni','723':'cirkevni',
+    '112':'sro','121':'as','205':'druzstvo' };
+  return m[String(kod||'').trim()]||null;
+}
+async function aresLoad(){
+  const org=data.chapters.organizace||{};
+  let ico=String(org.ico||'').replace(/\D+/g,'');
+  const msg=document.getElementById('aresmsg');
+  const setMsg=(t,err)=>{ if(msg){ msg.textContent=t; msg.style.color=err?'#b91c1c':'var(--muted)'; } };
+  if(!ico || ico.length>8){ setMsg('Zadejte do pole IČO platné číslo (max 8 číslic) a zkuste to znovu.',true); return; }
+  ico=ico.padStart(8,'0');
+  const btn=document.querySelector('[data-act="aresLoad"]');
+  const orig=btn?btn.innerHTML:''; if(btn){ btn.disabled=true; btn.innerHTML=icon('spinner','spin')+' Načítám…'; }
+  setMsg('Načítám z ARES…');
+  try{
+    const res=await fetch('/api/ares?ico='+ico, { headers: apiHeaders() });
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+    if(res.status===404){ throw new Error('Subjekt s tímto IČO nebyl v ARES nalezen.'); }
+    if(!res.ok){ let m='ARES '+res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
+    const d=await res.json();
+    const done=[];
+    if(d.nazev){ setChapVal('organizace','nazev',d.nazev); done.push('název'); }
+    if(d.sidlo){ setChapVal('organizace','sidlo',d.sidlo); done.push('sídlo'); }
+    if(d.vznik){ setChapVal('organizace','vznik',d.vznik); done.push('datum vzniku'); }
+    setChapVal('organizace','ico',ico);
+    let formNote='';
+    const mapped=mapAresForm(d.pravniFormaKod);
+    if(mapped && !data.orgType){ data.orgType=mapped; formNote=' · typ organizace nastaven podle právní formy'; }
+    else if(d.pravniFormaNazev){ formNote=' · právní forma: '+d.pravniFormaNazev; }
+    renderEditor(); renderNav(); flashSaved();
+    setMsg(done.length?('Doplněno z ARES: '+done.join(', ')+formNote):('Subjekt nalezen, ale chybí údaje k doplnění.'+formNote));
+    toast('Údaje z ARES doplněny ✓');
+  }catch(e){ setMsg('Chyba: '+e.message,true); if(btn){ btn.disabled=false; btn.innerHTML=orig; } }
+}
+
 const appendixCache={};
 let pdfjsLib=null;
 async function loadPdfjs(){
@@ -1009,9 +1047,18 @@ function fieldHTML(c,f){
   const v=esc(chapVal(c.id,f.key));
   const help=f.help?`<span class="help">${f.help}</span>`:'';
   const attrs=`data-bind="chap" data-ch="${c.id}" data-key="${f.key}" placeholder="${f.placeholder||''}"`;
-  const input = f.type==='textarea'
-    ? `<textarea ${attrs}>${v}</textarea>`
-    : `<input type="${f.type==='number'?'number':'text'}" value="${v}" ${attrs} />`;
+  let input;
+  if(f.type==='textarea'){
+    input = `<textarea ${attrs}>${v}</textarea>`;
+  } else if(c.id==='organizace' && f.key==='ico'){
+    input = `<div class="row" style="gap:8px;align-items:center">
+      <input type="text" value="${v}" ${attrs} style="flex:1" />
+      <button class="btn small" data-act="aresLoad" title="Načíst údaje z registru ARES podle IČO">${icon('download')} Načíst z ARES</button>
+    </div>
+    <div id="aresmsg" class="help" style="margin-top:6px"></div>`;
+  } else {
+    input = `<input type="${f.type==='number'?'number':'text'}" value="${v}" ${attrs} />`;
+  }
   return `<div class="field"><label>${f.label}${help}</label>${input}</div>`;
 }
 
@@ -1728,6 +1775,7 @@ document.addEventListener('click', e=>{
     case 'export': exportJSON(); break;
     case 'reset': resetAll(); break;
     case 'extract': extract(); break;
+    case 'aresLoad': aresLoad(); break;
     case 'removeAsset': removeAsset(el.dataset.id); break;
     case 'removeLogo': removeLogo(); break;
     case 'applyBrand': applyBrand(); toast('Brand použit na vzhled ✓'); break;
