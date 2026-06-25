@@ -431,7 +431,7 @@
     <div class="preview-toolbar noprint">
       <button class="btn primary" data-act="print"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg> Tisk / Uložit do PDF</button>
       <button class="btn" data-act="tab" data-arg="editor"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Zpět do editoru</button>
-      <span class="muted" style="font-size:13px">Tip: v dialogu tisku zvolte „Uložit jako PDF". Stejné HTML poslouží i jako web microsite.</span>
+      <span class="muted" style="font-size:13px">Tip: v dialogu tisku zvolte „Uložit jako PDF". Stejné zobrazení můžete použít i jako webovou stránku.</span>
     </div>
     <div class="report" id="report"></div>
     <div class="preview-toolbar noprint" style="margin-top:16px;justify-content:center">
@@ -541,7 +541,7 @@ const ORG_TYPES = [
 
 const CHAPTERS = [
   { id:'uvod', label:'Úvodní slovo', ico:'edit', defaultStatus:'recommended',
-    lead:'Úvodní slovo ředitele/předsedy, shrnutí roku, poděkování, kontext.',
+    lead:'Úvodní slovo ředitele nebo předsedy: shrnutí uplynulého roku a poděkování.',
     narrative:{ notesKey:'poznamky', outputKey:'text',
       hint:'Napiš osobní, vřelé úvodní slovo do výroční zprávy (cca 150–250 slov). Vychází z odrážek níže.' } },
 
@@ -574,7 +574,7 @@ const CHAPTERS = [
     projects:true },
 
   { id:'lide', label:'Zaměstnanci a dobrovolníci', ico:'userCheck', defaultStatus:'optional',
-    lead:'Lidské zdroje za uplynulý rok.',
+    lead:'Lidé v organizaci za uplynulý rok.',
     fields:[
       {key:'zamestnanci', label:'Počet zaměstnanců (přepočtený)', type:'text', placeholder:'např. 4,5 úvazku'},
       {key:'dobrovolnici', label:'Počet dobrovolníků', type:'text', placeholder:'např. 35'},
@@ -582,7 +582,7 @@ const CHAPTERS = [
     ] },
 
   { id:'finance', label:'Hospodaření', ico:'wallet', defaultStatus:'required',
-    lead:'Přehled příjmů a výdajů a výsledek hospodaření. Částky v Kč.',
+    lead:'Přehled příjmů, výdajů a výsledku hospodaření. Částky uvádějte v Kč.',
     fields:[
       {key:'prijmy_dotace', label:'Příjmy: dotace a granty', type:'number', placeholder:'0'},
       {key:'prijmy_dary', label:'Příjmy: dary', type:'number', placeholder:'0'},
@@ -618,7 +618,7 @@ const CHAPTERS = [
 /* ============================================================ JAZYK / VERZE ============================================================ */
 const APP_VERSION='v0.9 · 25. 6. 2026';
 const CH_EN={uvod:'Foreword',organizace:'Basic information',poslani:'Mission and goals',organy:'Governance and management',cinnost:'Activities and projects',lide:'Employees and volunteers',finance:'Finances',ucetni:'Financial statements and audit',darci:'Acknowledgements',plany:'Outlook for the next year'};
-const CH_TIP={uvod:'Doporučujeme generovat úplně na konec, ze zadaných dat z ostatních kapitol.'};
+const CH_TIP={uvod:'Doporučujeme generovat až na konec, z údajů vyplněných v ostatních kapitolách.'};
 const CH_NOTE_PH={
   poslani:'• komu a jak pomáháme&#10;• proč organizace vznikla&#10;• čeho chceme dlouhodobě dosáhnout&#10;• naše hodnoty',
   darci:'• kdo nás letos podpořil (dárci, partneři)&#10;• typ podpory: finanční, materiální, dobrovolnická&#10;• komu chcete obzvlášť poděkovat',
@@ -850,7 +850,7 @@ function renderOrgPicker(){
   });
   return `<div class="panel">
     <h2>Typ organizace</h2>
-    <p class="lead">Vyberte podle sektoru a právní formy, zobrazí se relevantní kapitoly a zákonné povinnosti.</p>
+    <p class="lead">Vyberte podle sektoru a právní formy, zobrazí se odpovídající kapitoly a zákonné povinnosti.</p>
     <div class="field" style="max-width:520px;margin-bottom:0">
       <select data-act="orgType">${opts}</select>
     </div>
@@ -1205,7 +1205,7 @@ function renderMaterials(){
   </div>`;
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Nahraj své podklady</h2></div>
-    <p class="lead">Nahrajte vše, co máte, starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
+    <p class="lead">Nahrajte vše, co máte: starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
     ${thermo}
     <div class="dropzone" id="dropzone">
       ${icon('uploadCloud')}
@@ -1312,7 +1312,7 @@ function renderBrand(){
     </div>
 
     <div class="row" style="margin-top:6px">
-      <button class="btn primary" data-act="applyBrand">${icon('palette')} Použít brand na vzhled</button>
+      <button class="btn primary" data-act="applyBrand">${icon('palette')} Použít na vzhled zprávy</button>
       <span class="muted" style="font-size:12.5px">Projeví se v náhledu zprávy.</span>
     </div>
   </div>`;
@@ -1833,7 +1833,7 @@ document.addEventListener('click', e=>{
     case 'aresLoad': aresLoad(); break;
     case 'removeAsset': removeAsset(el.dataset.id); break;
     case 'removeLogo': removeLogo(); break;
-    case 'applyBrand': applyBrand(); toast('Brand použit na vzhled ✓'); break;
+    case 'applyBrand': applyBrand(); toast('Vzhled zprávy aktualizován ✓'); break;
     case 'save': save(); break;
     case 'expand': expand(el.dataset.arg, +el.dataset.pct); break;
     case 'expandProj': expandProj(el.dataset.ch, +el.dataset.i, +el.dataset.pct); break;
