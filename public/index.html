@@ -500,7 +500,7 @@ const CHAPTERS = [
     fields:[
       {key:'nazev', label:'Název organizace', type:'text', placeholder:'Např. Spolek Dobrá věc, z. s.'},
       {key:'ico', label:'IČO', type:'text', placeholder:'12345678'},
-      {key:'rok', label:'Rok / období zprávy', type:'text', placeholder:'2025'},
+      {key:'rok', label:'Rok / období zprávy', type:'text', placeholder:'2024', help:'obvykle uplynulý (loňský) rok'},
       {key:'sidlo', label:'Sídlo', type:'text', placeholder:'Ulice, město, PSČ'},
       {key:'vznik', label:'Datum vzniku', type:'text', placeholder:'např. 12. 3. 2010'},
       {key:'web', label:'Web / kontakt', type:'text', placeholder:'www…, e-mail'},
@@ -623,6 +623,7 @@ function load(k,def){ try{ return Object.assign(def, JSON.parse(localStorage.get
 let cfg = load(LS_CFG, { apikey:'', model:'claude-sonnet-4-6' });
 
 function genId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id'+Date.now()+Math.round(Math.random()*1e6)); }
+function lastYear(){ try{ return new Date().getFullYear()-1; }catch(e){ return 2024; } }
 function hydrateDoc(d){
   d = (d && typeof d==='object') ? d : {};
   d.chapters = d.chapters || {}; d.assets = d.assets || []; if(typeof d.orgType!=='string') d.orgType='';
@@ -630,6 +631,8 @@ function hydrateDoc(d){
   if(!d.brand.logoId && (d.brand.primary||'').toLowerCase()==='#0d9488'){ d.brand.primary='#334155'; d.brand.secondary='#1e293b'; }
   if(!d.project) d.project = genId();
   d.lang = 'cs'; // EN zaparkováno do budoucí samostatné EN verze; vše jede česky
+  d.chapters.organizace = d.chapters.organizace || {};
+  if(!(d.chapters.organizace.rok||'').toString().trim()) d.chapters.organizace.rok = String(lastYear()); // zpráva je za uplynulý rok
   return d;
 }
 function defaultDoc(){ return hydrateDoc({ orgType:'', chapters:{} }); }
@@ -1452,7 +1455,7 @@ function orgContext(){
   const og=data.chapters.organizace||{};
   const o=orgType();
   const styl=(data.brand&&data.brand.manualNotes||'').trim();
-  return `Organizace: ${og.nazev||'(neuvedeno)'} | Typ: ${o?o.label:'(neuvedeno)'} | Rok zprávy: ${og.rok||'(neuvedeno)'} | Poslání (poznámky): ${chapVal('poslani','poznamky')||'(neuvedeno)'}`+(styl?`\nPOŽADOVANÝ STYL/TÓN: ${styl}`:'');
+  return `Organizace: ${og.nazev||'(neuvedeno)'} | Typ: ${o?o.label:'(neuvedeno)'} | Rok zprávy: ${og.rok||'(neuvedeno)'} (uplynulý rok, piš o něm v minulém čase) | Poslání (poznámky): ${chapVal('poslani','poznamky')||'(neuvedeno)'}`+(styl?`\nPOŽADOVANÝ STYL/TÓN: ${styl}`:'');
 }
 
 function assembleReportDigest(){
