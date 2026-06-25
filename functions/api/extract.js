@@ -12,7 +12,7 @@ export async function onRequestPost(context) {
 
   const intro = 'Níže jsou podklady organizace (starší výroční zprávy, dokumenty, fotky). Každý soubor je uvozen identifikátorem.';
   const tail = `\nÚkol: Z podkladů vytěž informace pro výroční zprávu organizace typu "${body.orgType || ''}" a vrať POUZE validní JSON přesně v této struktuře. Chybějící údaje nech jako prázdný řetězec. U každé fotky (image) navrhni vhodnou kapitolu (jeden z: uvod, poslani, organy, cinnost, lide, finance, darci, plany) a krátký popisek.\n\n` + SCHEMA_HINT;
-  const system = 'Jsi asistent, který z podkladů extrahuje data do české výroční zprávy. Vracíš POUZE JSON podle zadané struktury, nic jiného (žádný úvod, žádné ```).';
+  const system = 'Jsi asistent, který z podkladů extrahuje data do české výroční zprávy. Vyplň POUZE údaje, které se v podkladech skutečně vyskytují — nic si nevymýšlej, čísla ani jména nehádej, chybějící pole nech jako prázdný řetězec. Texty drž věcné a bez frází. Vracíš POUZE JSON podle zadané struktury, nic jiného (žádný úvod, žádné ```).';
 
   // Postavíme obsah pro oba poskytovatele
   const aContent = [{ type: 'text', text: intro }];

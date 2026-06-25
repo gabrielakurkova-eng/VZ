@@ -853,7 +853,13 @@ async function generate(chId){
   const notes=chapVal(chId,n.notesKey);
   if(!notes.trim()){ toast('Nejprve zadejte poznámky.'); return; }
   const btn=document.getElementById('gen-'+chId); setBusy(btn,true);
-  const sys=`Jsi zkušený copywriter, který píše výroční zprávy českých organizací. Píšeš spisovnou, čtivou a důstojnou češtinou. Vracíš POUZE výsledný text odstavci, bez nadpisů, bez odrážek, bez uvozovek a bez meta-komentářů.`;
+  const sys=`Jsi editor výročních zpráv českých organizací. Z dodaných faktů sestav věcný, čtivý a důstojný text v první osobě množného čísla (např. „realizovali jsme").
+PRAVIDLA:
+- Vycházej VÝHRADNĚ z dodaných podkladů a kontextu. Nikdy si nevymýšlej čísla, jména, data, výsledky, partnery ani události, které v podkladech nejsou.
+- Co není v podkladech, nedoplňuj. Když je faktů málo, napiš kratší text — nenafukuj ho vatou.
+- Žádná klišé a fráze („v dnešní nelehké době", „jsme nesmírně hrdí", „jak všichni víme") a žádné prázdné superlativy bez opory ve faktech.
+- Konkrétní před obecným: jména, čísla a výsledky z podkladů upřednostni.
+- Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`;
   const usr=`${n.hint}\n\nKONTEXT ORGANIZACE:\n${orgContext()}\n\nPODKLADY (odrážky od uživatele) pro kapitolu „${c.label}":\n${notes}`;
   try{
     const text=await callClaude(sys,usr);
@@ -867,7 +873,10 @@ async function generateProj(chId,i){
   const p=ensureItems(chId)[i];
   if(!(p.poznamky||'').trim()){ toast('Nejprve zadejte poznámky k projektu.'); return; }
   const btn=document.getElementById(`genproj-${chId}-${i}`); setBusy(btn,true);
-  const sys=`Jsi zkušený copywriter výročních zpráv českých organizací. Píšeš spisovnou, čtivou češtinou. Vracíš POUZE souvislý text (1–2 odstavce), bez nadpisů a odrážek.`;
+  const sys=`Jsi editor výročních zpráv. Z dodaných faktů napiš věcný popis projektu (1–2 odstavce) v první osobě množného čísla.
+- Vycházej JEN z dodaných podkladů; nevymýšlej si čísla, jména, výsledky ani události, které tam nejsou.
+- Když je faktů málo, buď stručný — žádná vata ani klišé.
+- Spisovná čeština, vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`;
   const usr=`Napiš souvislý popis projektu/aktivity do výroční zprávy (cca 80–140 slov). Zdůrazni cíl, co se dělo a výsledky/dopad.\n\nKONTEXT:\n${orgContext()}\n\nNázev projektu: ${p.nazev||'(bez názvu)'}\nPodklady:\n${p.poznamky}`;
   try{
     const text=await callClaude(sys,usr);
