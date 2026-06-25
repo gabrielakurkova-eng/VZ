@@ -272,6 +272,43 @@
   .docitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
   .docitem input{flex:1;min-width:0}
   .docitem .btn .ic{width:14px;height:14px}
+  /* anglický podtitul + přepínač jazyka */
+  .brand small.en{display:block;font-size:11px;color:#94a3b8;margin-top:2px;font-style:italic;font-weight:500}
+  .langtoggle{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+  .langtoggle button{border:0;background:transparent;padding:7px 11px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+  .langtoggle button.active{background:var(--brand);color:#fff}
+  /* tip v kapitole */
+  .tip{display:flex;align-items:flex-start;gap:8px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;margin:0 0 16px}
+  .tip .ic{width:16px;height:16px;color:#f59e0b;flex:none;margin-top:1px}
+  /* osoby */
+  .peopleblock{margin-bottom:18px}
+  .peoplehead{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;margin-bottom:10px}
+  .peoplehead .ic{width:17px;height:17px;color:var(--brand)}
+  .peoplelist{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+  .person{display:flex;gap:12px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;background:#fcfdfe}
+  .personphoto{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;background:#eef2f6;color:#94a3b8;cursor:pointer;overflow:hidden}
+  .personphoto img{width:100%;height:100%;object-fit:cover}
+  .personphoto .ic{width:20px;height:20px}
+  .personf{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+  /* fotka projektu */
+  .projphoto{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1.5px dashed #cfd8e3;border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted);margin-bottom:10px}
+  .projphoto:hover{border-color:var(--brand);color:var(--brand-ink)}
+  .projphoto img{height:46px;border-radius:6px;display:block}
+  .projphoto .ic{width:16px;height:16px;flex:none}
+  /* osoby ve zprávě */
+  .report .rpeople{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:16px;margin:10px 0 18px}
+  .report .rperson{text-align:center}
+  .report .rperson img,.report .rperson .rpph{width:84px;height:84px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 7px;background:#eef2f6}
+  .report .rpn{font-weight:700;font-size:13.5px;color:#1e293b}
+  .report .rpr{font-size:12.5px;color:var(--muted)}
+  /* patička */
+  .appfooter{max-width:1180px;margin:44px auto 0;padding:24px 22px 12px;border-top:1px solid var(--line);color:var(--muted)}
+  .appfooter .ft-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .appfooter .ft-h{font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:6px}
+  .appfooter p{font-size:12.5px;line-height:1.6;margin:0}
+  .appfooter a{color:var(--brand-ink);font-weight:600}
+  .appfooter .ft-bottom{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;text-align:center}
+  @media(max-width:760px){ .appfooter .ft-grid{grid-template-columns:1fr;gap:18px} }
 
   @media print{
     body{background:#fff}
@@ -297,9 +334,10 @@
           <circle cx="16" cy="10.5" r="1.1" fill="#fff" stroke="none"/>
         </svg>
       </div>
-      <div class="brand">Generátor výročních zpráv<small>Praktická aplikace pro organizace i firmy</small></div>
+      <div class="brand">Generátor výročních zpráv<small>Praktická aplikace pro organizace i firmy</small><small class="en">Annual Report Generator — a practical application for businesses and organizations.</small></div>
     </div>
     <div class="spacer"></div>
+    <div class="langtoggle noprint" id="langtoggle"></div>
     <div class="docbar noprint">
       <select id="docselect" title="Přepnout zprávu"></select>
       <button class="btn small" data-act="newdoc">+ Nová</button>
@@ -365,6 +403,25 @@
     </div>
   </div>
 
+  <footer class="appfooter noprint">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-h">O aplikaci</div>
+        <p>Tvorba výroční zprávy krok za krokem: výběr typu organizace, nahrání podkladů, roztřídění do kapitol pomocí AI, generování textů, fotky a loga, vzhled podle vašeho loga a export do PDF. Pro NNO i firmy, v souladu s platnou legislativou ČR.</p>
+      </div>
+      <div>
+        <div class="ft-h">Ochrana dat (GDPR)</div>
+        <p>Vaše texty i nahrané soubory zůstávají uložené lokálně ve vašem prohlížeči — neukládáme je na vlastní servery. Pro generování textů se obsah odesílá ke zpracování umělé inteligenci (Anthropic Claude, případně Google Gemini). Nenahrávejte citlivé osobní údaje, které do zprávy nepatří.</p>
+      </div>
+      <div>
+        <div class="ft-h">Kontakt</div>
+        <p><a href="mailto:hello@somniary.com">hello@somniary.com</a></p>
+        <div class="ft-h" style="margin-top:12px">Verze</div>
+        <p>v0.9 · 25. 6. 2026</p>
+      </div>
+    </div>
+    <div class="ft-bottom">© 2026 · Generátor výročních zpráv · Annual Report Generator</div>
+  </footer>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -427,7 +484,7 @@ const CHAPTERS = [
     narrative:{ notesKey:'poznamky', outputKey:'text',
       hint:'Zformuluj jasné, srozumitelné poslání a hlavní cíle organizace (cca 80–150 slov) z odrážek níže.' } },
 
-  { id:'organy', label:'Orgány a vedení', ico:'users', defaultStatus:'recommended',
+  { id:'organy', label:'Orgány a vedení', ico:'users', defaultStatus:'recommended', people:true,
     lead:'Statutární a další orgány, vedení a změny v jejich složení za rok.',
     fields:[
       {key:'statutar', label:'Statutární orgán', type:'textarea', placeholder:'Jména a funkce…'},
@@ -481,6 +538,17 @@ const CHAPTERS = [
       hint:'Napiš sebevědomý a konkrétní výhled na další rok (cca 100–150 slov) z odrážek níže.' } },
 ];
 
+/* ============================================================ JAZYK / VERZE ============================================================ */
+const APP_VERSION='v0.9 · 25. 6. 2026';
+const CH_EN={uvod:'Foreword',organizace:'Basic information',poslani:'Mission and goals',organy:'Governance and management',cinnost:'Activities and projects',lide:'Employees and volunteers',finance:'Finances',ucetni:'Financial statements and audit',darci:'Acknowledgements',plany:'Outlook for the next year'};
+const CH_TIP={uvod:'Doporučujeme generovat úplně na konec — ze zadaných dat z ostatních kapitol.'};
+const EN={'Výroční zpráva':'Annual Report','Základní údaje':'Basic information','Název':'Name','Právní forma':'Legal form','IČO':'Reg. No.','Sídlo':'Registered office','Datum vzniku':'Founded','Web / kontakt':'Web / contact','Hospodaření':'Finances','Příjmy':'Income','Výdaje':'Expenses','Celkem':'Total','Výsledek hospodaření':'Net result','Stav majetku':'Assets','Dotace a granty':'Grants and subsidies','Dary':'Donations','Vlastní činnost / tržby':'Own activities / revenue','Ostatní':'Other','Provozní':'Operating','Osobní / mzdy':'Personnel / wages','Projektové':'Project','Lidé / členové':'People / members'};
+function lang(){ return (typeof data!=='undefined' && data && data.lang==='en') ? 'en' : 'cs'; }
+function L(s){ return (lang()==='en' && EN[s]) ? EN[s] : s; }
+function chLabel(idOrC){ const id=typeof idOrC==='string'?idOrC:idOrC.id; const c=CHAPTERS.find(x=>x.id===id)||{}; return (lang()==='en'&&CH_EN[id])?CH_EN[id]:(c.label||id); }
+function langDirective(){ return lang()==='en' ? '\n\nDŮLEŽITÉ: Celý výstup napiš ANGLICKY (write the entire output in English).' : ''; }
+function setLang(l){ data.lang=(l==='en')?'en':'cs'; persist(); renderAll(); }
+
 /* ============================================================ IKONY (SVG, styl Lucide) ============================================================ */
 const ICONS={
  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
@@ -528,6 +596,7 @@ function hydrateDoc(d){
   d.brand = Object.assign({ primary:'#334155', secondary:'#1e293b', font:'', logoId:'', logoUrl:'', manualNotes:'' }, d.brand || {});
   if(!d.brand.logoId && (d.brand.primary||'').toLowerCase()==='#0d9488'){ d.brand.primary='#334155'; d.brand.secondary='#1e293b'; }
   if(!d.project) d.project = genId();
+  d.lang = (d.lang==='en') ? 'en' : 'cs';
   return d;
 }
 function defaultDoc(){ return hydrateDoc({ orgType:'', chapters:{} }); }
@@ -583,6 +652,10 @@ function renameDoc(id,name){ const it=docs.list.find(x=>x.id===id); if(it){ it.n
 function renderDocs(){
   const sel=document.getElementById('docselect'); if(!sel) return;
   sel.innerHTML=docs.list.map(d=>`<option value="${d.id}" ${d.id===docs.currentId?'selected':''}>${esc(d.name||'Bez názvu')}</option>`).join('');
+}
+function renderLang(){
+  const el=document.getElementById('langtoggle'); if(!el) return;
+  el.innerHTML=['cs','en'].map(l=>`<button class="${lang()===l?'active':''}" data-act="lang" data-arg="${l}">${l==='cs'?'CZ':'EN'}</button>`).join('');
 }
 function renderDocsSettings(){
   const el=document.getElementById('docsmgr'); if(!el) return;
@@ -728,6 +801,8 @@ function renderChapter(c){
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon(c.ico)}</span>${c.label}</h2>${pill}</div>
     <p class="lead">${c.lead}</p>
+    ${CH_TIP[c.id]?`<div class="tip">${icon('sparkles')} ${CH_TIP[c.id]}</div>`:''}
+    ${c.people?peopleHTML(c):''}
     ${inner}
     ${chapterMediaHTML(c)}
     ${saveBar()}
@@ -823,6 +898,7 @@ function projectsHTML(c){
           data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="nazev" />
         <button class="btn ghost small" style="color:#b00" data-act="delProj" data-ch="${c.id}" data-i="${i}">${icon('x')}</button>
       </div>
+      <label class="projphoto" title="Fotka projektu">${p.photoId&&tmpURL[p.photoId]?`<img src="${tmpURL[p.photoId]}" alt="">`:`${icon('image')}<span>Přidat fotku projektu</span>`}<input type="file" accept="image/*" data-projphoto="${c.id}" data-i="${i}" style="display:none"></label>
       <div class="field"><label>Poznámky (fakta v odrážkách)</label>
         <textarea placeholder="• cíl projektu&#10;• co se dělo&#10;• výsledky a čísla / dopad"
           data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="poznamky">${esc(p.poznamky||'')}</textarea>
@@ -845,6 +921,29 @@ function ensureItems(chId){ const d=(data.chapters[chId]=data.chapters[chId]||{}
 function addProj(chId){ ensureItems(chId).push({nazev:'',poznamky:'',popis:''}); persist(); renderEditor(); renderNav(); }
 function delProj(chId,i){ ensureItems(chId).splice(i,1); persist(); renderEditor(); renderNav(); }
 function updProj(chId,i,k,v){ ensureItems(chId)[i][k]=v; persist(); }
+
+/* osoby (s fotkou) + fotky projektů */
+async function uploadImageToIDB(file){ const id=genId(); await IDB.set(id,file); tmpURL[id]=URL.createObjectURL(file); return id; }
+function ensurePeople(chId){ const d=(data.chapters[chId]=data.chapters[chId]||{}); d.people=d.people||[]; return d.people; }
+function addPerson(chId){ ensurePeople(chId).push({name:'',role:'',photoId:''}); persist(); renderEditor(); }
+function delPerson(chId,i){ const ppl=ensurePeople(chId); const p=ppl[i]; if(p&&p.photoId) IDB.del(p.photoId); ppl.splice(i,1); persist(); renderEditor(); }
+function setPersonProp(chId,i,key,val){ const p=ensurePeople(chId)[i]; if(p){ p[key]=val; persist(); flashSaved(); } }
+function peopleHTML(c){
+  const ppl=(data.chapters[c.id]||{}).people||[];
+  const rows=ppl.map((p,i)=>{ const url=p.photoId?(tmpURL[p.photoId]||''):''; return `<div class="person">
+    <label class="personphoto" title="Nahrát fotku">${url?`<img src="${url}" alt="">`:icon('image')}<input type="file" accept="image/*" data-personphoto="${c.id}" data-i="${i}" style="display:none"></label>
+    <div class="personf">
+      <input type="text" placeholder="Jméno a příjmení" value="${esc(p.name||'')}" data-bind="person" data-ch="${c.id}" data-i="${i}" data-key="name">
+      <input type="text" placeholder="Funkce / role" value="${esc(p.role||'')}" data-bind="person" data-ch="${c.id}" data-i="${i}" data-key="role">
+    </div>
+    <button class="btn ghost small" data-act="delPerson" data-ch="${c.id}" data-i="${i}" title="Odebrat">${icon('x')}</button>
+  </div>`; }).join('');
+  return `<div class="peopleblock">
+    <div class="peoplehead">${icon('users')} Lidé / členové (s fotkou)</div>
+    ${rows?`<div class="peoplelist">${rows}</div>`:''}
+    <button class="btn small" data-act="addPerson" data-ch="${c.id}">${icon('plus')} Přidat osobu</button>
+  </div>`;
+}
 
 /* ============================================================ MATERIÁLY + BRAND KIT ============================================================ */
 function brandFilled(){ const b=data.brand||{}; return !!(b.logoId || b.logoUrl || (b.manualNotes||'').trim() || (b.primary && b.primary.toLowerCase()!=='#0d9488')); }
@@ -998,6 +1097,12 @@ function afterRender(){
   document.querySelectorAll('[data-chfile]').forEach(inp=>{
     inp.addEventListener('change', e=>{ const f=e.target.files; if(f&&f.length) handleChapterFiles(inp.dataset.chfile, f); });
   });
+  document.querySelectorAll('[data-personphoto]').forEach(inp=>{
+    inp.addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f)return; const id=await uploadImageToIDB(f); const it=ensurePeople(inp.dataset.personphoto)[+inp.dataset.i]; if(it){ if(it.photoId) IDB.del(it.photoId); it.photoId=id; persist(); renderEditor(); flashSaved(); } });
+  });
+  document.querySelectorAll('[data-projphoto]').forEach(inp=>{
+    inp.addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f)return; const id=await uploadImageToIDB(f); const it=ensureItems(inp.dataset.projphoto)[+inp.dataset.i]; if(it){ if(it.photoId) IDB.del(it.photoId); it.photoId=id; persist(); renderEditor(); flashSaved(); } });
+  });
 }
 
 /* Soubory se ukládají lokálně v prohlížeči (IndexedDB) — žádné placené úložiště. */
@@ -1012,10 +1117,15 @@ function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader
 function uuid(){ return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():('id'+Date.now()+Math.round(Math.random()*1e6)); }
 
 async function hydrateAssets(){
+  const ids=new Set();
+  (data.assets||[]).forEach(a=>ids.add(a.id));
+  if(data.brand&&data.brand.logoId) ids.add(data.brand.logoId);
+  Object.values(data.chapters||{}).forEach(ch=>{
+    (ch.items||[]).forEach(it=>{ if(it.photoId) ids.add(it.photoId); });
+    (ch.people||[]).forEach(p=>{ if(p.photoId) ids.add(p.photoId); });
+  });
   let changed=false;
-  for(const a of (data.assets||[])){ if(!tmpURL[a.id]){ try{ const b=await IDB.get(a.id); if(b){ tmpURL[a.id]=URL.createObjectURL(b); changed=true; } }catch(e){} } }
-  const lid=data.brand&&data.brand.logoId;
-  if(lid && !tmpURL[lid]){ try{ const b=await IDB.get(lid); if(b){ tmpURL[lid]=URL.createObjectURL(b); changed=true; } }catch(e){} }
+  for(const id of ids){ if(id && !tmpURL[id]){ try{ const b=await IDB.get(id); if(b){ tmpURL[id]=URL.createObjectURL(b); changed=true; } }catch(e){} } }
   if(changed){ renderEditor(); if(tab==='preview') renderReport(); }
 }
 
@@ -1051,7 +1161,7 @@ function save(){ persist(); flashSaved(); toast('Uloženo ✓'); }
 
 async function expandCommon(curr, notes, pct){
   const tone=(data.brand&&data.brand.manualNotes||'').trim();
-  const sys=`Jsi editor výročních zpráv. Rozšiř dodaný text přibližně o ${pct} %: přidej detail, kontext a plynulejší přechody, ale NEVYMÝŠLEJ nová fakta (čísla, jména, výsledky ani události) — vyjdi jen z původních podkladů a stávajícího textu. Zachovej 1. osobu množného čísla a věcný tón. Vrať POUZE rozšířený text v odstavcích, bez nadpisů, uvozovek a komentářů.`+(tone?`\nTÓN: ${tone}`:'');
+  const sys=`Jsi editor výročních zpráv. Rozšiř dodaný text přibližně o ${pct} %: přidej detail, kontext a plynulejší přechody, ale NEVYMÝŠLEJ nová fakta (čísla, jména, výsledky ani události) — vyjdi jen z původních podkladů a stávajícího textu. Zachovej 1. osobu množného čísla a věcný tón. Vrať POUZE rozšířený text v odstavcích, bez nadpisů, uvozovek a komentářů.`+(tone?`\nTÓN: ${tone}`:'')+langDirective();
   const usr=`KONTEXT:\n${orgContext()}\n\nPŮVODNÍ PODKLADY:\n${notes||'(žádné navíc)'}\n\nSTÁVAJÍCÍ TEXT:\n${curr}`;
   return await callClaude(sys,usr);
 }
@@ -1221,7 +1331,7 @@ PRAVIDLA:
 - Žádná klišé a fráze („v dnešní nelehké době", „jsme nesmírně hrdí", „jak všichni víme") a žádné prázdné superlativy bez opory ve faktech.
 - Konkrétní před obecným: jména, čísla a výsledky z podkladů upřednostni.
 - Neoslovuj uživatele a nepiš poznámky o tom, že podklady chybí nebo jsou omezené. Když faktů není dost, napiš jen krátký věcný text z toho, co máš — text musí jít rovnou vložit do zprávy.
-- Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`;
+- Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`+langDirective();
   const usr=`${n.hint}\n\nKONTEXT ORGANIZACE:\n${orgContext()}\n\nPODKLADY (odrážky od uživatele) pro kapitolu „${c.label}":\n${notes}`;
   try{
     const text=await callClaude(sys,usr);
@@ -1239,7 +1349,7 @@ async function generateProj(chId,i){
 - Vycházej JEN z dodaných podkladů; nevymýšlej si čísla, jména, výsledky ani události, které tam nejsou.
 - Když je faktů málo, buď stručný — žádná vata ani klišé.
 - Neoslovuj uživatele a nepiš poznámky o chybějících podkladech; vrať jen text vložitelný rovnou do zprávy.
-- Spisovná čeština, vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`;
+- Spisovná čeština, vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`+langDirective();
   const usr=`Napiš souvislý popis projektu/aktivity do výroční zprávy (cca 80–140 slov). Zdůrazni cíl, co se dělo a výsledky/dopad.\n\nKONTEXT:\n${orgContext()}\n\nNázev projektu: ${p.nazev||'(bez názvu)'}\nPodklady:\n${p.poznamky}`;
   try{
     const text=await callClaude(sys,usr);
@@ -1278,7 +1388,7 @@ function renderReport(){
   const hero=heroUrl?`<div class="hero"><img src="${heroUrl}" alt=""></div>`:'';
   let cover=`<div class="cover">
     ${logoUrl?`<img class="cover-logo" src="${logoUrl}" alt="logo">`:''}
-    <div class="kicker">Výroční zpráva</div>
+    <div class="kicker">${L('Výroční zpráva')}</div>
     <div class="year">${esc(og.rok||'')||'&nbsp;'}</div>
     <div class="org">${esc(og.nazev||'Název organizace')}</div>
     <div class="cmeta">${[o?o.label:'', og.ico?'IČO '+esc(og.ico):''].filter(Boolean).join(' · ')}</div>
@@ -1292,9 +1402,10 @@ function renderReport(){
     else if(c.projects) sec=sectionProjects(c);
     else if(c.fields) sec=sectionFields(c);
     else if(c.narrative) sec=sectionNarrative(c);
+    const ppl=reportPeople(c.id);
     const ph=reportPhotos(c.id);
-    if(sec) body+=sec+ph;
-    else if(ph) body+=`<h2>${esc(c.label)}</h2>`+ph;
+    if(sec) body+=sec+ppl+ph;
+    else if(ppl||ph) body+=`<h2>${esc(chLabel(c))}</h2>`+ppl+ph;
   });
   r.innerHTML=hero+cover+`<div class="body">${body}</div>`;
 }
@@ -1302,27 +1413,37 @@ function sectionOrg(og){
   const o=orgType();
   const rows=[['Název',og.nazev],['Právní forma',o?o.label:''],['IČO',og.ico],['Sídlo',og.sidlo],['Datum vzniku',og.vznik],['Web / kontakt',og.web]].filter(r=>r[1]);
   if(!rows.length) return '';
-  return `<h2>Základní údaje</h2><table class="meta-table">${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>`;
+  return `<h2>${L('Základní údaje')}</h2><table class="meta-table">${rows.map(r=>`<tr><td>${esc(L(r[0]))}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>`;
 }
 function sectionFields(c){
   const d=data.chapters[c.id]||{};
   const parts=c.fields.filter(f=>(d[f.key]||'').toString().trim());
   if(!parts.length) return '';
-  let h=`<h2>${esc(c.label)}</h2>`;
+  let h=`<h2>${esc(chLabel(c))}</h2>`;
   parts.forEach(f=>{ h+=`<h3>${esc(f.label)}</h3>`+paras(d[f.key]); });
   return h;
 }
 function sectionNarrative(c){
   const txt=chapVal(c.id,c.narrative.outputKey)||chapVal(c.id,c.narrative.notesKey);
   if(!txt.trim()) return '';
-  return `<h2>${esc(c.label)}</h2>`+paras(txt);
+  return `<h2>${esc(chLabel(c))}</h2>`+paras(txt);
+}
+function reportPeople(chId){
+  const ppl=((data.chapters[chId]||{}).people||[]).filter(p=>(p.name||p.role||p.photoId));
+  if(!ppl.length) return '';
+  return `<div class="rpeople">`+ppl.map(p=>{ const url=p.photoId?(tmpURL[p.photoId]||''):''; return `<div class="rperson">${url?`<img src="${url}" alt="">`:'<div class="rpph"></div>'}<div class="rpn">${esc(p.name||'')}</div>${p.role?`<div class="rpr">${esc(p.role)}</div>`:''}</div>`; }).join('')+`</div>`;
 }
 function sectionProjects(c){
   const items=(data.chapters[c.id]||{}).items||[];
-  const filled=items.filter(p=>(p.nazev||p.popis||p.poznamky||'').trim());
+  const filled=items.filter(p=>(p.nazev||p.popis||p.poznamky||p.photoId||'').toString().trim());
   if(!filled.length) return '';
-  let h=`<h2>${esc(c.label)}</h2>`;
-  filled.forEach(p=>{ if(p.nazev) h+=`<h3>${esc(p.nazev)}</h3>`; h+=paras(p.popis||p.poznamky); });
+  let h=`<h2>${esc(chLabel(c))}</h2>`;
+  filled.forEach(p=>{
+    if(p.nazev) h+=`<h3>${esc(p.nazev)}</h3>`;
+    const url=p.photoId?(tmpURL[p.photoId]||''):'';
+    if(url) h+=`<div class="rgallery"><figure><img src="${url}" alt=""></figure></div>`;
+    h+=paras(p.popis||p.poznamky);
+  });
   return h;
 }
 function sectionFinance(c){
@@ -1333,18 +1454,19 @@ function sectionFinance(c){
   const anyNum=prijmy.concat(vydaje).some(([,k])=>(d[k]||'').toString().trim());
   const komentar=chapVal(c.id,'text')||chapVal(c.id,'komentar');
   if(!anyNum && !(d.majetek||'').trim() && !komentar.trim()) return '';
-  let h=`<h2>Hospodaření</h2>`;
+  const cur=lang()==='en'?'CZK':'Kč';
+  let h=`<h2>${L('Hospodaření')}</h2>`;
   if(komentar.trim()) h+=paras(komentar);
   if(anyNum){
     const tp=sum(prijmy), tv=sum(vydaje), vh=tp-tv;
     const tbl=(title,arr,tot)=>`<h3>${title}</h3><table class="fin"><tbody>`+
-      arr.filter(([,k])=>(d[k]||'').toString().trim()).map(([l,k])=>`<tr><td>${l}</td><td class="num">${fmt(d[k])} Kč</td></tr>`).join('')+
-      `<tr><td><b>Celkem</b></td><td class="num"><b>${fmt(tot)} Kč</b></td></tr></tbody></table>`;
-    h+=tbl('Příjmy',prijmy,tp);
-    h+=tbl('Výdaje',vydaje,tv);
-    h+=`<table class="fin"><tbody><tr><td><b>Výsledek hospodaření</b></td><td class="num"><b>${fmt(vh)} Kč</b></td></tr></tbody></table>`;
+      arr.filter(([,k])=>(d[k]||'').toString().trim()).map(([l,k])=>`<tr><td>${esc(L(l))}</td><td class="num">${fmt(d[k])} ${cur}</td></tr>`).join('')+
+      `<tr><td><b>${L('Celkem')}</b></td><td class="num"><b>${fmt(tot)} ${cur}</b></td></tr></tbody></table>`;
+    h+=tbl(L('Příjmy'),prijmy,tp);
+    h+=tbl(L('Výdaje'),vydaje,tv);
+    h+=`<table class="fin"><tbody><tr><td><b>${L('Výsledek hospodaření')}</b></td><td class="num"><b>${fmt(vh)} ${cur}</b></td></tr></tbody></table>`;
   }
-  if((d.majetek||'').trim()){ h+=`<h3>Stav majetku</h3>`+paras(d.majetek); }
+  if((d.majetek||'').trim()){ h+=`<h3>${L('Stav majetku')}</h3>`+paras(d.majetek); }
   return h;
 }
 
@@ -1365,7 +1487,7 @@ function importJSON(file){
   rd.readAsText(file);
 }
 function resetAll(){ if(confirm('Opravdu vymazat všechna data této zprávy?')){ data={orgType:'',chapters:{}}; persist(); activeChapter='organizace'; renderAll(); toast('Vymazáno.'); } }
-function renderAll(){ renderDocs(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
+function renderAll(){ renderDocs(); renderLang(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
 
 /* ============================================================ EVENT DELEGATION (CSP-safe) ============================================================ */
 document.addEventListener('click', e=>{
@@ -1391,6 +1513,9 @@ document.addEventListener('click', e=>{
     case 'newdoc': newDoc(); break;
     case 'opendoc': switchDoc(el.dataset.id); break;
     case 'deldoc': deleteDoc(el.dataset.id); break;
+    case 'lang': setLang(el.dataset.arg); break;
+    case 'addPerson': addPerson(el.dataset.ch); break;
+    case 'delPerson': delPerson(el.dataset.ch, +el.dataset.i); break;
   }
 });
 document.addEventListener('change', e=>{
@@ -1406,6 +1531,7 @@ document.addEventListener('input', e=>{
   const el=e.target;
   if(el.matches('[data-bind="chap"]')){ setChapVal(el.dataset.ch, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="proj"]')){ updProj(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
+  else if(el.matches('[data-bind="person"]')){ setPersonProp(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
   else if(el.matches('input[type=text][data-bind="asset"]')){ setAssetProp(el.dataset.id, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); }
   else if(el.matches('[data-renamedoc]')){ renameDoc(el.dataset.renamedoc, el.value); }
