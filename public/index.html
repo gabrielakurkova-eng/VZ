@@ -511,7 +511,7 @@ const CHAPTERS = [
     narrative:{ notesKey:'poznamky', outputKey:'text',
       hint:'Zformuluj jasné, srozumitelné poslání a hlavní cíle organizace (cca 80–150 slov) z odrážek níže.' } },
 
-  { id:'organy', label:'Orgány a vedení', ico:'users', defaultStatus:'recommended', people:true,
+  { id:'organy', label:'Orgány a vedení', ico:'users', defaultStatus:'recommended',
     lead:'Statutární a další orgány, vedení a změny v jejich složení za rok.',
     fields:[
       {key:'statutar', label:'Statutární orgán', type:'textarea', placeholder:'Např.: Jan Novák, předseda; Eva Malá, místopředsedkyně; Petr Svoboda, člen'},
@@ -1575,10 +1575,9 @@ function renderReport(){
     else if(c.projects) sec=sectionProjects(c);
     else if(c.fields) sec=sectionFields(c);
     else if(c.narrative) sec=sectionNarrative(c);
-    const ppl=reportPeople(c.id);
     const ph=reportPhotos(c.id);
-    if(sec) body+=sec+ppl+ph;
-    else if(ppl||ph) body+=`<h2>${esc(chLabel(c))}</h2>`+ppl+ph;
+    if(sec) body+=sec+ph;
+    else if(ph) body+=`<h2>${esc(chLabel(c))}</h2>`+ph;
   });
   r.innerHTML=hero+cover+`<div class="body">${body}</div>`+appendixHTML();
 }
