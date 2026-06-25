@@ -215,6 +215,22 @@
   .report .rgallery img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block}
   .report .rgallery figcaption{font-size:12.5px;color:var(--muted);margin-top:5px;font-family:var(--sans)}
 
+  /* ---- uložení / rozšíření / teploměr ---- */
+  .savestatus{font-size:12.5px;color:var(--brand-ink);font-weight:600;opacity:0;transition:opacity .2s;display:inline-flex;align-items:center;gap:5px}
+  .savestatus.show{opacity:1}
+  .savestatus .ic{width:14px;height:14px}
+  .savebar{display:flex;align-items:center;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .savebar .btn .ic{width:14px;height:14px;color:var(--brand)}
+  .expandrow{margin-top:10px;gap:8px;flex-wrap:wrap}
+  .expandrow .btn .ic{width:13px;height:13px}
+  .thermo{margin:0 0 18px;background:var(--brand-soft);border:1px solid var(--brand-soft2);border-radius:12px;padding:13px 15px}
+  .thermo .thlabel{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--brand-ink);margin-bottom:8px}
+  .thermo .thbar{height:9px;border-radius:20px;background:#fff;overflow:hidden;border:1px solid var(--brand-soft2)}
+  .thermo .thfill{height:100%;border-radius:20px;background:linear-gradient(90deg,#f59e0b,#14b8a6);transition:width .4s ease}
+  .thermo .thhint{font-size:12px;color:var(--muted);margin-top:8px}
+  .assetcard .assetsaved{font-size:10px;color:var(--brand-ink);display:flex;align-items:center;gap:3px;margin:4px 9px 8px;opacity:.85}
+  .assetcard .assetsaved .ic{width:11px;height:11px}
+
   @media print{
     body{background:#fff}
     .app{max-width:none;padding:0}
@@ -241,6 +257,7 @@
       <div class="brand">Výroční zpráva<small>generátor pro organizace · MVP</small></div>
     </div>
     <div class="spacer"></div>
+    <span id="savestatus" class="savestatus noprint"></span>
     <div class="tabs">
       <button id="tab-editor" class="active" data-act="tab" data-arg="editor">Editor</button>
       <button id="tab-preview" data-act="tab" data-arg="preview">Náhled / PDF</button>
@@ -436,6 +453,8 @@ const ICONS={
  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
  uploadCloud:'<path d="M12 13v8"/><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="m8 17 4-4 4 4"/>',
  fileText:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/>',
+ check:'<polyline points="20 6 9 17 4 12"/>',
+ expand:'<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>',
  spinner:'<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'
 };
 function icon(n,cls){ const p=ICONS[n]; if(!p) return ''; return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`; }
@@ -585,6 +604,13 @@ function renderChapter(c){
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon(c.ico)}</span>${c.label}</h2>${pill}</div>
     <p class="lead">${c.lead}</p>
     ${inner}
+    ${saveBar()}
+  </div>`;
+}
+function saveBar(){
+  return `<div class="savebar">
+    <button class="btn small" data-act="save">${icon('check')} Uložit</button>
+    <span class="muted" style="font-size:12px">Změny se ukládají i automaticky</span>
   </div>`;
 }
 
@@ -614,6 +640,11 @@ function narrativeHTML(c){
     <div class="ai-out" ${out?'':'style="display:none"'} id="out-${c.id}">
       <div class="aohead">Návrh textu</div>
       <textarea data-bind="chap" data-ch="${c.id}" data-key="${n.outputKey}">${out}</textarea>
+      <div class="row expandrow">
+        <span class="muted" style="font-size:12px">Rozšířit text:</span>
+        <button class="btn ghost small" data-act="expand" data-arg="${c.id}" data-pct="25">${icon('expand')} +25 %</button>
+        <button class="btn ghost small" data-act="expand" data-arg="${c.id}" data-pct="50">${icon('expand')} +50 %</button>
+      </div>
     </div>
   </div>`;
 }
@@ -634,6 +665,11 @@ function projectsHTML(c){
       <div class="ai-out" ${p.popis?'':'style="display:none"'} id="outproj-${c.id}-${i}">
         <div class="aohead">Popis projektu</div>
         <textarea data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="popis">${esc(p.popis||'')}</textarea>
+        <div class="row expandrow">
+          <span class="muted" style="font-size:12px">Rozšířit:</span>
+          <button class="btn ghost small" data-act="expandProj" data-ch="${c.id}" data-i="${i}" data-pct="25">${icon('expand')} +25 %</button>
+          <button class="btn ghost small" data-act="expandProj" data-ch="${c.id}" data-i="${i}" data-pct="50">${icon('expand')} +50 %</button>
+        </div>
       </div>
     </div>`).join('');
   html+=`<button class="btn" data-act="addProj" data-ch="${c.id}">${icon('plus')} Přidat projekt / aktivitu</button>`;
@@ -652,9 +688,22 @@ function renderMaterials(){
   const assets=data.assets||[];
   const list = assets.length ? `<div class="assetgrid">`+assets.map(a=>assetCard(a)).join('')+`</div>`
     : `<p class="muted" style="margin:14px 0 0">Zatím nic nenahráno.</p>`;
+  const n=assets.length;
+  const hasPdf=assets.some(a=>(a.mime||'')==='application/pdf');
+  const photos=assets.filter(a=>a.kind==='photo'||(a.mime||'').startsWith('image/')).length;
+  const score=Math.max(n?8:0, Math.min(100, n*18 + (hasPdf?25:0) + Math.min(photos,3)*5));
+  const level = n===0 ? '—' : (score>=70?'Bohaté':score>=40?'Dobrý základ':'Základní');
+  const hint = n===0 ? 'Nahrajte staré VZ a fotky — čím víc podkladů, tím konkrétnější výsledek AI.'
+    : (score>=70 ? 'Skvělé, AI má z čeho čerpat.' : (hasPdf?'Dobré. Přidejte i fotky k projektům.':'Tip: přidejte starou výroční zprávu (PDF) pro výrazně lepší výsledek.'));
+  const thermo = `<div class="thermo">
+    <div class="thlabel"><span>Bohatost podkladů</span><span>${level}</span></div>
+    <div class="thbar"><div class="thfill" style="width:${score}%"></div></div>
+    <div class="thhint">${hint}</div>
+  </div>`;
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Materiály</h2></div>
     <p class="lead">Nahrajte vše, co máte — starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
+    ${thermo}
     <div class="dropzone" id="dropzone">
       ${icon('uploadCloud')}
       <div class="dztext"><strong>Přetáhněte soubory sem</strong> nebo klikněte pro výběr</div>
@@ -677,6 +726,7 @@ function assetCard(a){
     ${a.uploading?'<div class="uploadbar"></div>':''}
     ${thumb}
     <div class="assetname" title="${esc(a.name||'')}">${esc(a.name||'soubor')}</div>
+    <div class="assetsaved">${icon('check')} uloženo</div>
     ${a.chapter?`<div class="assettag">${esc(chapterLabel(a.chapter))}</div>`:''}
   </div>`;
 }
@@ -714,8 +764,15 @@ function renderBrand(){
       </select>
     </div>
 
-    <div class="field"><label>Grafický manuál / instrukce ke stylu <span class="help">volitelné — promítne se do tónu AI textů</span></label>
-      <textarea data-bind="brand" data-key="manualNotes" placeholder="Např.: tón formální, oslovujeme „vy"; logo vlevo nahoře; fialovou jen na akcenty…">${esc(b.manualNotes||'')}</textarea>
+    <div class="field">
+      <label>Ton of voice — tón a styl textů <span class="help">promítne se do AI generování</span></label>
+      <textarea data-bind="brand" data-key="manualNotes" placeholder="Např.: vřelý a lidský tón, oslovujeme „vy", krátké věty, konkrétní příběhy, bez korporátních frází…">${esc(b.manualNotes||'')}</textarea>
+      <div class="row" style="margin-top:8px">
+        <label class="btn small" style="cursor:pointer">${icon('upload')} Nahrát dokument s tónem
+          <input type="file" id="toneinput" accept=".pdf,image/*,.txt,.doc,.docx" style="display:none" />
+        </label>
+        <span class="muted" style="font-size:12px">AI z dokumentu vytáhne pokyny k tónu a doplní je výše.</span>
+      </div>
     </div>
 
     <div class="row" style="margin-top:6px">
@@ -737,6 +794,8 @@ function afterRender(){
   }
   const li=document.getElementById('logoinput');
   if(li) li.addEventListener('change', e=>{ const f=e.target.files[0]; if(f) handleLogo(f); });
+  const ti=document.getElementById('toneinput');
+  if(ti) ti.addEventListener('change', e=>{ const f=e.target.files[0]; if(f) handleToneDoc(f); });
 }
 
 /* Soubory se ukládají lokálně v prohlížeči (IndexedDB) — žádné placené úložiště. */
@@ -779,6 +838,43 @@ async function handleLogo(file){
 
 function removeAsset(id){ IDB.del(id); data.assets=(data.assets||[]).filter(a=>a.id!==id); persist(); renderEditor(); renderNav(); }
 function removeLogo(){ if(data.brand.logoId) IDB.del(data.brand.logoId); data.brand.logoId=''; data.brand.logoUrl=''; persist(); applyBrand(); renderEditor(); renderNav(); }
+
+/* uložení + rozšíření textu + tón z dokumentu */
+function flashSaved(){ const el=document.getElementById('savestatus'); if(!el) return; el.innerHTML=icon('check')+' Uloženo'; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1600); }
+function save(){ persist(); flashSaved(); toast('Uloženo ✓'); }
+
+async function expandCommon(curr, notes, pct){
+  const tone=(data.brand&&data.brand.manualNotes||'').trim();
+  const sys=`Jsi editor výročních zpráv. Rozšiř dodaný text přibližně o ${pct} %: přidej detail, kontext a plynulejší přechody, ale NEVYMÝŠLEJ nová fakta (čísla, jména, výsledky ani události) — vyjdi jen z původních podkladů a stávajícího textu. Zachovej 1. osobu množného čísla a věcný tón. Vrať POUZE rozšířený text v odstavcích, bez nadpisů, uvozovek a komentářů.`+(tone?`\nTÓN: ${tone}`:'');
+  const usr=`KONTEXT:\n${orgContext()}\n\nPŮVODNÍ PODKLADY:\n${notes||'(žádné navíc)'}\n\nSTÁVAJÍCÍ TEXT:\n${curr}`;
+  return await callClaude(sys,usr);
+}
+async function expand(chId,pct){
+  const c=CHAPTERS.find(x=>x.id===chId), n=c.narrative;
+  const curr=chapVal(chId,n.outputKey); if(!curr.trim()){ toast('Nejdřív vygenerujte text.'); return; }
+  const btn=document.querySelector(`#out-${chId} [data-act="expand"][data-pct="${pct}"]`); setBusy(btn,true);
+  try{ const t=await expandCommon(curr, chapVal(chId,n.notesKey), pct); setChapVal(chId,n.outputKey,t); renderEditor(); renderNav(); flashSaved(); toast('Text rozšířen ✓'); }
+  catch(e){ toast('Chyba: '+e.message); } finally{ setBusy(btn,false); }
+}
+async function expandProj(chId,i,pct){
+  const p=ensureItems(chId)[i]; if(!p||!(p.popis||'').trim()){ toast('Nejdřív vygenerujte popis.'); return; }
+  const btn=document.querySelector(`#outproj-${chId}-${i} [data-act="expandProj"][data-pct="${pct}"]`); setBusy(btn,true);
+  try{ const t=await expandCommon(p.popis, p.poznamky, pct); updProj(chId,i,'popis',t); renderEditor(); renderNav(); flashSaved(); toast('Popis rozšířen ✓'); }
+  catch(e){ toast('Chyba: '+e.message); } finally{ setBusy(btn,false); }
+}
+
+async function handleToneDoc(file){
+  toast('Analyzuji tón…');
+  try{
+    const dataB64=await blobToB64(file);
+    const res=await fetch('/api/tone',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({file:{mime:file.type||'application/octet-stream',dataB64}})});
+    if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
+    const j=await res.json();
+    const cur=(data.brand.manualNotes||'').trim();
+    data.brand.manualNotes = cur ? (cur+'\n'+(j.tone||'')) : (j.tone||'');
+    persist(); applyBrand(); renderEditor(); flashSaved(); toast('Tón vytažen z dokumentu ✓');
+  }catch(e){ toast('Nepodařilo se: '+e.message); }
+}
 
 async function extract(){
   const assets=(data.assets||[]);
@@ -1021,6 +1117,9 @@ document.addEventListener('click', e=>{
     case 'removeAsset': removeAsset(el.dataset.id); break;
     case 'removeLogo': removeLogo(); break;
     case 'applyBrand': applyBrand(); toast('Brand použit na vzhled ✓'); break;
+    case 'save': save(); break;
+    case 'expand': expand(el.dataset.arg, +el.dataset.pct); break;
+    case 'expandProj': expandProj(el.dataset.ch, +el.dataset.i, +el.dataset.pct); break;
   }
 });
 document.addEventListener('change', e=>{
@@ -1035,6 +1134,7 @@ document.addEventListener('input', e=>{
   else if(el.matches('[data-bind="proj"]')){ updProj(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); }
   else if(el.matches('[data-bind="cfg"]')){ cfg[el.dataset.key]=el.value.trim?el.value.trim():el.value; persistCfg(); }
+  if(el.matches('[data-bind="chap"],[data-bind="proj"],[data-bind="brand"]')) flashSaved();
 });
 document.getElementById('importfile').addEventListener('change', e=>{ const f=e.target.files[0]; if(f) importJSON(f); });
 
