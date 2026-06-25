@@ -309,6 +309,16 @@
   .appfooter a{color:var(--brand-ink);font-weight:600}
   .appfooter .ft-bottom{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;text-align:center}
   @media(max-width:760px){ .appfooter .ft-grid{grid-template-columns:1fr;gap:18px} }
+  /* účetní výkazy + přílohy */
+  .doclist{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .docrow{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fcfdfe;font-size:13.5px}
+  .docrow .ic{width:18px;height:18px;color:var(--brand);flex:none}
+  .docrow .docname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .report .appendix{margin-top:32px}
+  .report .appendix .apph{page-break-before:always}
+  .report .apage{margin:0 0 18px;page-break-inside:avoid}
+  .report .aptitle{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 8px}
+  .report .apimg{width:100%;border:1px solid #eef2f6;border-radius:8px;display:block}
 
   @media print{
     body{background:#fff}
@@ -543,7 +553,7 @@ const CHAPTERS = [
 const APP_VERSION='v0.9 · 25. 6. 2026';
 const CH_EN={uvod:'Foreword',organizace:'Basic information',poslani:'Mission and goals',organy:'Governance and management',cinnost:'Activities and projects',lide:'Employees and volunteers',finance:'Finances',ucetni:'Financial statements and audit',darci:'Acknowledgements',plany:'Outlook for the next year'};
 const CH_TIP={uvod:'Doporučujeme generovat úplně na konec — ze zadaných dat z ostatních kapitol.'};
-const EN={'Výroční zpráva':'Annual Report','Základní údaje':'Basic information','Název':'Name','Právní forma':'Legal form','IČO':'Reg. No.','Sídlo':'Registered office','Datum vzniku':'Founded','Web / kontakt':'Web / contact','Hospodaření':'Finances','Příjmy':'Income','Výdaje':'Expenses','Celkem':'Total','Výsledek hospodaření':'Net result','Stav majetku':'Assets','Dotace a granty':'Grants and subsidies','Dary':'Donations','Vlastní činnost / tržby':'Own activities / revenue','Ostatní':'Other','Provozní':'Operating','Osobní / mzdy':'Personnel / wages','Projektové':'Project','Lidé / členové':'People / members'};
+const EN={'Výroční zpráva':'Annual Report','Základní údaje':'Basic information','Název':'Name','Právní forma':'Legal form','IČO':'Reg. No.','Sídlo':'Registered office','Datum vzniku':'Founded','Web / kontakt':'Web / contact','Hospodaření':'Finances','Příjmy':'Income','Výdaje':'Expenses','Celkem':'Total','Výsledek hospodaření':'Net result','Stav majetku':'Assets','Dotace a granty':'Grants and subsidies','Dary':'Donations','Vlastní činnost / tržby':'Own activities / revenue','Ostatní':'Other','Provozní':'Operating','Osobní / mzdy':'Personnel / wages','Projektové':'Project','Lidé / členové':'People / members','Přílohy':'Appendices'};
 function lang(){ return (typeof data!=='undefined' && data && data.lang==='en') ? 'en' : 'cs'; }
 function L(s){ return (lang()==='en' && EN[s]) ? EN[s] : s; }
 function chLabel(idOrC){ const id=typeof idOrC==='string'?idOrC:idOrC.id; const c=CHAPTERS.find(x=>x.id===id)||{}; return (lang()==='en'&&CH_EN[id])?CH_EN[id]:(c.label||id); }
@@ -687,7 +697,7 @@ function setTab(t){
   document.getElementById('view-preview').style.display = t==='preview'?'block':'none';
   document.getElementById('view-settings').style.display = t==='settings'?'block':'none';
   ['editor','preview','settings'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
-  if(t==='preview') renderReport();
+  if(t==='preview'){ renderReport(); ensureAppendix(); }
   if(t==='settings'){ document.getElementById('model').value=cfg.model; renderDocsSettings(); }
 }
 
@@ -810,7 +820,8 @@ function renderChapter(c){
   </div>`;
 }
 function chapterMediaHTML(c){
-  const imgs=(data.assets||[]).filter(a=>isImg(a)&&a.chapter===c.id);
+  if(c.id==='finance') return financeDocsHTML(c);
+  const imgs=(data.assets||[]).filter(a=>isImg(a)&&a.chapter===c.id&&!a.appendix);
   const isDarci=c.id==='darci';
   const label=isDarci?'Loga partnerů / dárců':'Fotky / obrázky';
   const rows=imgs.map(a=>{ const url=tmpURL[a.id]||a.url||''; return `<div class="chphoto">
@@ -848,6 +859,87 @@ async function handleChapterFiles(chId, files){
     added++;
   }
   if(added){ persist(); renderEditor(); renderNav(); flashSaved(); toast('Přidáno ✓'); }
+}
+
+/* Hospodaření: účetní výkazy → údaje do textu + přílohy v PDF */
+function financeDocsHTML(c){
+  const atts=(data.assets||[]).filter(a=>a.chapter==='finance'&&a.kind==='attachment');
+  const rows=atts.map(a=>`<div class="docrow">${icon('fileText')}<span class="docname" title="${esc(a.name||'')}">${esc(a.name||'soubor')}</span><span class="pill opt">příloha</span><button class="btn ghost small" data-act="removeAsset" data-id="${a.id}" title="Odebrat">${icon('x')}</button></div>`).join('');
+  return `<div class="chmedia">
+    <div class="chmhead">${icon('barchart')} Účetní výkazy a přílohy</div>
+    <p class="muted" style="font-size:12.5px;margin:0 0 10px">Nahraj rozvahu, výsledovku, přílohu k účetní závěrce, výrok auditora apod. (PDF nebo sken). AI z nich vytáhne klíčové údaje do textu a kompletní výkazy přidá jako přílohy na konec PDF — jak vyžaduje zákon.</p>
+    <label class="chupload">${icon('uploadCloud')} <span>Nahrát výkaz / přílohu</span>
+      <input type="file" accept=".pdf,image/*,.xlsx,.xls" multiple data-chdoc="finance" style="display:none">
+    </label>
+    ${rows?`<div class="doclist">${rows}</div>`:''}
+    ${atts.length?`<div class="row" style="margin-top:12px"><button class="btn primary small" id="financeai" data-act="financeAI">${icon('sparkles')} Vytáhnout klíčové údaje z výkazů</button><span class="muted" style="font-size:12px">Doplní čísla a komentář k hospodaření.</span></div>`:''}
+  </div>`;
+}
+async function handleChapterDocs(chId, files){
+  let added=0;
+  for(const f of Array.from(files)){
+    const id=genId();
+    try{ await IDB.set(id,f); }catch(e){ toast('Nepodařilo se uložit: '+e.message); continue; }
+    tmpURL[id]=URL.createObjectURL(f);
+    data.assets.push({ id, name:f.name, mime:f.type||'application/octet-stream', kind:'attachment', chapter:chId, appendix:true });
+    added++;
+  }
+  if(added){ persist(); renderEditor(); renderNav(); flashSaved(); toast('Příloha přidána ✓'); }
+}
+async function financeAI(){
+  const atts=(data.assets||[]).filter(a=>a.chapter==='finance'&&a.kind==='attachment');
+  if(!atts.length){ toast('Nahraj nejdřív výkazy.'); return; }
+  const btn=document.getElementById('financeai'); setBusy(btn,true);
+  try{
+    const files=[];
+    for(const a of atts){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, dataB64:await blobToB64(b) }); }
+    if(!files.length) throw new Error('Soubory se nepodařilo načíst.');
+    const res=await fetch('/api/finance',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({files})});
+    if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
+    const r=(await res.json()).result||{}; const f=r.fields||{};
+    ['prijmy_dotace','prijmy_dary','prijmy_vlastni','prijmy_ostatni','vydaje_provoz','vydaje_mzdy','vydaje_projekty','vydaje_ostatni','majetek'].forEach(k=>{ if(f[k]!=null && String(f[k]).trim()) setChapVal('finance',k,String(f[k])); });
+    if(r.commentary && r.commentary.trim()) setChapVal('finance','text',r.commentary.trim());
+    renderEditor(); renderNav(); flashSaved(); toast('Údaje z výkazů doplněny ✓');
+  }catch(e){ toast('Chyba: '+e.message); }
+  finally{ setBusy(btn,false); }
+}
+
+const appendixCache={};
+let pdfjsLib=null;
+async function loadPdfjs(){
+  if(pdfjsLib) return pdfjsLib;
+  pdfjsLib=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.mjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.mjs';
+  return pdfjsLib;
+}
+async function renderPdfToImages(blob){
+  const lib=await loadPdfjs(); const buf=await blob.arrayBuffer();
+  const pdf=await lib.getDocument({data:buf}).promise; const out=[]; const N=Math.min(pdf.numPages,30);
+  for(let i=1;i<=N;i++){ const page=await pdf.getPage(i); const vp=page.getViewport({scale:1.6}); const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise; out.push(cv.toDataURL('image/jpeg',0.82)); }
+  return out;
+}
+async function ensureAppendix(){
+  const pdfs=(data.assets||[]).filter(a=>a.appendix && a.mime==='application/pdf');
+  let any=false;
+  for(const a of pdfs){ if(!appendixCache[a.id]){ try{ const b=await IDB.get(a.id); if(b){ appendixCache[a.id]=await renderPdfToImages(b); any=true; } }catch(e){ appendixCache[a.id]=['__err__']; any=true; } } }
+  if(any && tab==='preview') renderReport();
+}
+function appendixHTML(){
+  const atts=(data.assets||[]).filter(a=>a.appendix);
+  if(!atts.length) return '';
+  let h=`<div class="appendix"><h2 class="apph">${L('Přílohy')}</h2>`;
+  atts.forEach(a=>{
+    const isImage=(a.mime||'').startsWith('image/');
+    if(isImage){ const url=tmpURL[a.id]||a.url||''; h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div>${url?`<img class="apimg" src="${url}">`:''}</div>`; }
+    else if(a.mime==='application/pdf'){
+      const pages=appendixCache[a.id];
+      if(pages && pages[0]!=='__err__'){ pages.forEach((u,idx)=>{ h+=`<div class="apage">${idx===0?`<div class="aptitle">${esc(a.name||'')}</div>`:''}<img class="apimg" src="${u}"></div>`; }); }
+      else h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Náhled přílohy se připravuje — otevři záložku Náhled a chvíli počkej.</p></div>`;
+    } else {
+      h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Tento typ souboru nelze vložit do PDF — přiložte ho samostatně.</p></div>`;
+    }
+  });
+  return h+`</div>`;
 }
 function saveBar(){
   return `<div class="savebar">
@@ -1104,6 +1196,9 @@ function afterRender(){
   document.querySelectorAll('[data-projphoto]').forEach(inp=>{
     inp.addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f)return; const id=await uploadImageToIDB(f); const it=ensureItems(inp.dataset.projphoto)[+inp.dataset.i]; if(it){ if(it.photoId) IDB.del(it.photoId); it.photoId=id; persist(); renderEditor(); flashSaved(); } });
   });
+  document.querySelectorAll('[data-chdoc]').forEach(inp=>{
+    inp.addEventListener('change', e=>{ const f=e.target.files; if(f&&f.length) handleChapterDocs(inp.dataset.chdoc, f); });
+  });
 }
 
 /* Soubory se ukládají lokálně v prohlížeči (IndexedDB) — žádné placené úložiště. */
@@ -1298,7 +1393,7 @@ function ensureFont(name){
   document.head.appendChild(l);
 }
 function reportPhotos(chId){
-  const photos=(data.assets||[]).filter(a=>isImg(a) && a.chapter===chId && !a.cover);
+  const photos=(data.assets||[]).filter(a=>isImg(a) && a.chapter===chId && !a.cover && !a.appendix);
   if(chId==='darci'){
     const logos=photos.map(a=>{ const url=tmpURL[a.id]||a.url||''; if(!url) return ''; return `<div class="rlogo"><img src="${url}" alt="${esc(a.caption||'')}"/></div>`; }).filter(Boolean);
     return logos.length?`<div class="rlogos">${logos.join('')}</div>`:'';
@@ -1330,6 +1425,7 @@ PRAVIDLA:
 - Vycházej VÝHRADNĚ z dodaných podkladů a kontextu. Nikdy si nevymýšlej čísla, jména, data, výsledky, partnery ani události, které v podkladech nejsou.
 - Co není v podkladech, nedoplňuj. Když je faktů málo, napiš kratší text — nenafukuj ho vatou.
 - Žádná klišé a fráze („v dnešní nelehké době", „jsme nesmírně hrdí", „jak všichni víme") a žádné prázdné superlativy bez opory ve faktech.
+- Piš přirozenou, gramaticky a stylisticky správnou češtinou; vyhni se typickým AI obratům, nadužívání pomlček a doslovným anglickým kalkům.
 - Konkrétní před obecným: jména, čísla a výsledky z podkladů upřednostni.
 - Neoslovuj uživatele a nepiš poznámky o tom, že podklady chybí nebo jsou omezené. Když faktů není dost, napiš jen krátký věcný text z toho, co máš — text musí jít rovnou vložit do zprávy.
 - Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`+langDirective();
@@ -1408,7 +1504,7 @@ function renderReport(){
     if(sec) body+=sec+ppl+ph;
     else if(ppl||ph) body+=`<h2>${esc(chLabel(c))}</h2>`+ppl+ph;
   });
-  r.innerHTML=hero+cover+`<div class="body">${body}</div>`;
+  r.innerHTML=hero+cover+`<div class="body">${body}</div>`+appendixHTML();
 }
 function sectionOrg(og){
   const o=orgType();
@@ -1517,6 +1613,7 @@ document.addEventListener('click', e=>{
     case 'lang': setLang(el.dataset.arg); break;
     case 'addPerson': addPerson(el.dataset.ch); break;
     case 'delPerson': delPerson(el.dataset.ch, +el.dataset.i); break;
+    case 'financeAI': financeAI(); break;
   }
 });
 document.addEventListener('change', e=>{
