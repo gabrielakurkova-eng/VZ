@@ -153,7 +153,7 @@
 
   /* ---- report (preview) ---- */
   .report{background:#fff;max-width:840px;margin:0 auto;padding:0 0 60px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg);font-family:var(--sans);color:#1e293b;overflow:hidden}
-  .report .cover{padding:60px 64px 42px;background:linear-gradient(135deg, var(--rcoverbg,#f6f8fb) 0%, var(--rcoverbg2,#eef2f6) 100%);border-bottom:1px solid var(--line);margin-bottom:8px}
+  .report .cover{padding:54px 64px 40px;background:#fff;border-bottom:1px solid var(--line);margin-bottom:8px}
   .report .cover .kicker{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin-bottom:10px}
   .report .cover .year{font-family:var(--disp);font-size:72px;font-weight:800;line-height:.95;letter-spacing:-.03em;color:#0b1220;margin-bottom:14px}
   .report .cover .org{font-family:var(--disp);font-size:26px;font-weight:700;color:#0b1220}
@@ -291,10 +291,15 @@
   .personphoto .ic{width:20px;height:20px}
   .personf{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
   /* fotka projektu */
-  .projphoto{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1.5px dashed #cfd8e3;border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted);margin-bottom:10px}
-  .projphoto:hover{border-color:var(--brand);color:var(--brand-ink)}
-  .projphoto img{height:46px;border-radius:6px;display:block}
-  .projphoto .ic{width:16px;height:16px;flex:none}
+  .projphotos{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:flex-start}
+  .ppic{position:relative;width:120px}
+  .ppic img{width:120px;height:80px;object-fit:cover;border-radius:8px;display:block;background:#eef2f6}
+  .ppic .ppicdel{position:absolute;top:4px;right:4px;width:22px;height:22px;border:0;border-radius:6px;background:rgba(11,18,32,.6);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+  .ppic .ppicdel .ic{width:12px;height:12px}
+  .ppic .ppiccap{width:120px;margin-top:5px;padding:5px 7px;font-size:11.5px}
+  .projaddphoto{display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:1.5px dashed #cfd8e3;border-radius:8px;padding:0 12px;height:80px;font-size:13px;color:var(--muted)}
+  .projaddphoto:hover{border-color:var(--brand);color:var(--brand-ink)}
+  .projaddphoto .ic{width:16px;height:16px;flex:none}
   /* osoby ve zprávě */
   .report .rpeople{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:16px;margin:10px 0 18px}
   .report .rperson{text-align:center}
@@ -350,7 +355,7 @@
           <circle cx="16" cy="10.5" r="1.1" fill="#fff" stroke="none"/>
         </svg>
       </div>
-      <div class="brand">Generátor výročních zpráv<small>Praktická aplikace pro organizace i firmy</small><small class="en">Annual Report Generator — a practical application for businesses and organizations.</small></div>
+      <div class="brand">Generátor výročních zpráv<small>Praktická aplikace pro organizace i firmy</small></div>
     </div>
     <div class="spacer"></div>
     <div class="langtoggle noprint" id="langtoggle"></div>
@@ -388,15 +393,15 @@
       <p class="lead">Nastavení AI a správa dat. Vše se ukládá lokálně do tohoto prohlížeče.</p>
 
       <div class="keyhint" style="background:var(--brand-soft);border:1px solid var(--brand-soft2);padding:12px 14px;border-radius:10px;color:var(--brand-ink)">
-        🔒 Claude API klíč je bezpečně uložen na serveru (Cloudflare secret <code>ANTHROPIC_API_KEY</code>) — nikdy se neposílá z prohlížeče. Nastavuje se při nasazení (viz README).
+        🔒 Claude API klíč je bezpečně uložen na serveru (Cloudflare secret <code>ANTHROPIC_API_KEY</code>), nikdy se neposílá z prohlížeče. Nastavuje se při nasazení (viz README).
       </div>
 
       <div class="field">
         <label>Model</label>
         <select id="model" data-bind="cfg" data-key="model">
-          <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — rychlý a levný (doporučeno)</option>
-          <option value="claude-opus-4-8">Claude Opus 4.8 — nejvyšší kvalita</option>
-          <option value="claude-haiku-4-5">Claude Haiku 4.5 — nejlevnější</option>
+          <option value="claude-sonnet-4-6">Claude Sonnet 4.6, rychlý a levný (doporučeno)</option>
+          <option value="claude-opus-4-8">Claude Opus 4.8, nejvyšší kvalita</option>
+          <option value="claude-haiku-4-5">Claude Haiku 4.5, nejlevnější</option>
         </select>
       </div>
 
@@ -415,7 +420,7 @@
         </label>
         <button class="btn ghost" data-act="reset" style="color:#b00"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> Vymazat vše</button>
       </div>
-      <div class="keyhint">JSON je přenositelný datový model — stejná data využije i budoucí plná verze (SaaS).</div>
+      <div class="keyhint">JSON je přenositelný datový model, stejná data využije i budoucí plná verze (SaaS).</div>
     </div>
   </div>
 
@@ -427,7 +432,7 @@
       </div>
       <div>
         <div class="ft-h">Ochrana dat (GDPR)</div>
-        <p>Vaše texty i nahrané soubory zůstávají uložené lokálně ve vašem prohlížeči — neukládáme je na vlastní servery. Pro generování textů se obsah odesílá ke zpracování umělé inteligenci (Anthropic Claude, případně Google Gemini). Nenahrávejte citlivé osobní údaje, které do zprávy nepatří.</p>
+        <p>Vaše texty i nahrané soubory zůstávají uložené lokálně ve vašem prohlížeči, neukládáme je na vlastní servery. Pro generování textů se obsah odesílá ke zpracování umělé inteligenci (Anthropic Claude, případně Google Gemini). Nenahrávejte citlivé osobní údaje, které do zprávy nepatří.</p>
       </div>
       <div>
         <div class="ft-h">Kontakt</div>
@@ -436,14 +441,14 @@
         <p>v0.9 · 25. 6. 2026</p>
       </div>
     </div>
-    <div class="ft-bottom">© 2026 · Generátor výročních zpráv · Annual Report Generator</div>
+    <div class="ft-bottom">© 2026 · Generátor výročních zpráv · zpracováno v souladu s platnou legislativou ČR</div>
   </footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* ============================================================
-   KONFIGURACE — typy organizací + kapitoly (datově řízené)
+   KONFIGURACE, typy organizací + kapitoly (datově řízené)
    ============================================================ */
 const ORG_TYPES = [
   { id:'spolek', label:'Spolek', cat:'Nezisková organizace',
@@ -474,13 +479,13 @@ const ORG_TYPES = [
     note:'Družstva reportují činnost a hospodaření dle stanov; sociální družstva často přidávají i reporting společenského dopadu.',
     required:['organizace','organy','cinnost','finance'], hidden:[] },
   { id:'jine', label:'Jiný typ organizace', cat:'Ostatní',
-    note:'Univerzální šablona — zobrazí se všechny kapitoly jako volitelné. Povinné sekce si určíte sami dle vlastních pravidel.',
+    note:'Univerzální šablona, zobrazí se všechny kapitoly jako volitelné. Povinné sekce si určíte sami dle vlastních pravidel.',
     required:['organizace'], hidden:[] },
 ];
 
 const CHAPTERS = [
   { id:'uvod', label:'Úvodní slovo', ico:'edit', defaultStatus:'recommended',
-    lead:'Úvodní slovo ředitele/předsedy — shrnutí roku, poděkování, kontext.',
+    lead:'Úvodní slovo ředitele/předsedy, shrnutí roku, poděkování, kontext.',
     narrative:{ notesKey:'poznamky', outputKey:'text',
       hint:'Napiš osobní, vřelé úvodní slovo do výroční zprávy (cca 150–250 slov). Vychází z odrážek níže.' } },
 
@@ -503,13 +508,13 @@ const CHAPTERS = [
   { id:'organy', label:'Orgány a vedení', ico:'users', defaultStatus:'recommended', people:true,
     lead:'Statutární a další orgány, vedení a změny v jejich složení za rok.',
     fields:[
-      {key:'statutar', label:'Statutární orgán', type:'textarea', placeholder:'Jména a funkce…'},
-      {key:'rada', label:'Správní / dozorčí rada (pokud je)', type:'textarea', placeholder:'Členové…'},
-      {key:'zmeny', label:'Změny ve složení orgánů za rok', type:'textarea', placeholder:'Kdo přišel/odešel…'},
+      {key:'statutar', label:'Statutární orgán', type:'textarea', placeholder:'Např.: Jan Novák, předseda; Eva Malá, místopředsedkyně; Petr Svoboda, člen'},
+      {key:'rada', label:'Správní / dozorčí rada (pokud je)', type:'textarea', placeholder:'Členové rady a jejich funkce (jméno, funkce)…'},
+      {key:'zmeny', label:'Změny ve složení orgánů za rok', type:'textarea', placeholder:'Co se za rok změnilo: kdo nastoupil, kdo odešel, volby do orgánů…'},
     ] },
 
   { id:'cinnost', label:'Činnost a projekty', ico:'layers', defaultStatus:'required',
-    lead:'Klíčové aktivity a projekty roku. Pro každý zadejte fakta v odrážkách — AI z nich vytvoří souvislý text.',
+    lead:'Klíčové aktivity a projekty roku. Pro každý zadejte fakta v odrážkách, AI z nich vytvoří souvislý text.',
     projects:true },
 
   { id:'lide', label:'Zaměstnanci a dobrovolníci', ico:'userCheck', defaultStatus:'optional',
@@ -523,15 +528,15 @@ const CHAPTERS = [
   { id:'finance', label:'Hospodaření', ico:'wallet', defaultStatus:'required',
     lead:'Přehled příjmů a výdajů a výsledek hospodaření. Částky v Kč.',
     fields:[
-      {key:'prijmy_dotace', label:'Příjmy — dotace a granty', type:'number', placeholder:'0'},
-      {key:'prijmy_dary', label:'Příjmy — dary', type:'number', placeholder:'0'},
-      {key:'prijmy_vlastni', label:'Příjmy — vlastní činnost / tržby', type:'number', placeholder:'0'},
-      {key:'prijmy_ostatni', label:'Příjmy — ostatní', type:'number', placeholder:'0'},
-      {key:'vydaje_provoz', label:'Výdaje — provozní', type:'number', placeholder:'0'},
-      {key:'vydaje_mzdy', label:'Výdaje — osobní / mzdy', type:'number', placeholder:'0'},
-      {key:'vydaje_projekty', label:'Výdaje — projektové', type:'number', placeholder:'0'},
-      {key:'vydaje_ostatni', label:'Výdaje — ostatní', type:'number', placeholder:'0'},
-      {key:'majetek', label:'Stav majetku (komentář)', type:'textarea', placeholder:'Krátký komentář ke stavu majetku…'},
+      {key:'prijmy_dotace', label:'Příjmy: dotace a granty', type:'number', placeholder:'0'},
+      {key:'prijmy_dary', label:'Příjmy: dary', type:'number', placeholder:'0'},
+      {key:'prijmy_vlastni', label:'Příjmy: vlastní činnost / tržby', type:'number', placeholder:'0'},
+      {key:'prijmy_ostatni', label:'Příjmy: ostatní', type:'number', placeholder:'0'},
+      {key:'vydaje_provoz', label:'Výdaje: provozní', type:'number', placeholder:'0'},
+      {key:'vydaje_mzdy', label:'Výdaje: osobní / mzdy', type:'number', placeholder:'0'},
+      {key:'vydaje_projekty', label:'Výdaje: projektové', type:'number', placeholder:'0'},
+      {key:'vydaje_ostatni', label:'Výdaje: ostatní', type:'number', placeholder:'0'},
+      {key:'majetek', label:'Stav majetku (komentář)', type:'textarea', placeholder:'Krátký komentář ke stavu majetku (budovy, vybavení, finanční rezervy)…'},
     ],
     narrative:{ notesKey:'komentar', outputKey:'text', optional:true,
       hint:'Napiš stručný komentář k hospodaření za rok (cca 80–120 slov) z odrážek; čísla nech na tabulce.' } },
@@ -539,8 +544,8 @@ const CHAPTERS = [
   { id:'ucetni', label:'Účetní závěrka a audit', ico:'barchart', defaultStatus:'optional',
     lead:'Odkaz na účetní závěrku a výrok auditora (je-li relevantní).',
     fields:[
-      {key:'zaverka', label:'Účetní závěrka', type:'textarea', placeholder:'Účetní závěrka je přílohou této zprávy / k dispozici na vyžádání…'},
-      {key:'audit', label:'Výrok auditora (pokud podléhá auditu)', type:'textarea', placeholder:'Výrok auditora, datum, jméno auditora…'},
+      {key:'zaverka', label:'Účetní závěrka', type:'textarea', placeholder:'Např.: Účetní závěrka je přílohou této zprávy. / K dispozici na vyžádání. / Uložena ve sbírce listin.'},
+      {key:'audit', label:'Výrok auditora (pokud podléhá auditu)', type:'textarea', placeholder:'Např.: Audit provedl(a) … dne …, výrok bez výhrad.'},
     ] },
 
   { id:'darci', label:'Poděkování dárcům', ico:'heart', defaultStatus:'optional',
@@ -557,7 +562,13 @@ const CHAPTERS = [
 /* ============================================================ JAZYK / VERZE ============================================================ */
 const APP_VERSION='v0.9 · 25. 6. 2026';
 const CH_EN={uvod:'Foreword',organizace:'Basic information',poslani:'Mission and goals',organy:'Governance and management',cinnost:'Activities and projects',lide:'Employees and volunteers',finance:'Finances',ucetni:'Financial statements and audit',darci:'Acknowledgements',plany:'Outlook for the next year'};
-const CH_TIP={uvod:'Doporučujeme generovat úplně na konec — ze zadaných dat z ostatních kapitol.'};
+const CH_TIP={uvod:'Doporučujeme generovat úplně na konec, ze zadaných dat z ostatních kapitol.'};
+const CH_NOTE_PH={
+  poslani:'• komu a jak pomáháme&#10;• proč organizace vznikla&#10;• čeho chceme dlouhodobě dosáhnout&#10;• naše hodnoty',
+  darci:'• kdo nás letos podpořil (dárci, partneři)&#10;• typ podpory: finanční, materiální, dobrovolnická&#10;• komu chcete obzvlášť poděkovat',
+  plany:'• cíle pro příští rok&#10;• plánované projekty a akce&#10;• co chceme rozšířit nebo zlepšit',
+  finance:'• z čeho jsme financovali činnost&#10;• významné změny oproti loňsku&#10;• jak jsme naložili s výsledkem hospodaření'
+};
 const EN={'Výroční zpráva':'Annual Report','Základní údaje':'Basic information','Název':'Name','Právní forma':'Legal form','IČO':'Reg. No.','Sídlo':'Registered office','Datum vzniku':'Founded','Web / kontakt':'Web / contact','Hospodaření':'Finances','Příjmy':'Income','Výdaje':'Expenses','Celkem':'Total','Výsledek hospodaření':'Net result','Stav majetku':'Assets','Dotace a granty':'Grants and subsidies','Dary':'Donations','Vlastní činnost / tržby':'Own activities / revenue','Ostatní':'Other','Provozní':'Operating','Osobní / mzdy':'Personnel / wages','Projektové':'Project','Lidé / členové':'People / members','Přílohy':'Appendices','Statutární orgán':'Statutory body','Správní / dozorčí rada (pokud je)':'Board (if any)','Změny ve složení orgánů za rok':'Changes in governing bodies during the year','Počet zaměstnanců (přepočtený)':'Employees (FTE)','Počet dobrovolníků':'Volunteers','Odpracované dobrovolnické hodiny':'Volunteer hours','Účetní závěrka':'Financial statements','Výrok auditora (pokud podléhá auditu)':'Auditor report'};
 function lang(){ return (typeof data!=='undefined' && data && data.lang==='en') ? 'en' : 'cs'; }
 function L(s){ return (lang()==='en' && EN[s]) ? EN[s] : s; }
@@ -656,7 +667,7 @@ function deleteDoc(id){
   const it=docs.list.find(x=>x.id===id); if(!it) return;
   if(!confirm('Opravdu smazat zprávu „'+(it.name||'Bez názvu')+'"? Nelze vrátit zpět.')) return;
   try{ const dd=loadDoc(id); (dd.assets||[]).forEach(a=>IDB.del(a.id)); if(dd.brand&&dd.brand.logoId) IDB.del(dd.brand.logoId);
-    Object.values(dd.chapters||{}).forEach(ch=>{ (ch.items||[]).forEach(it=>{ if(it.photoId) IDB.del(it.photoId); }); (ch.people||[]).forEach(p=>{ if(p.photoId) IDB.del(p.photoId); }); }); }catch(e){}
+    Object.values(dd.chapters||{}).forEach(ch=>{ (ch.items||[]).forEach(it=>{ if(it.photoId) IDB.del(it.photoId); (it.photos||[]).forEach(ph=>{ if(ph.id) IDB.del(ph.id); }); }); (ch.people||[]).forEach(p=>{ if(p.photoId) IDB.del(p.photoId); }); }); }catch(e){}
   localStorage.removeItem(DOC_PREFIX+id);
   docs.list=docs.list.filter(x=>x.id!==id);
   if(!docs.list.length){ const nid=genId(); const nd=defaultDoc(); localStorage.setItem(DOC_PREFIX+nid, JSON.stringify(nd)); docs.list.push({id:nid,name:'Nová zpráva'}); docs.currentId=nid; data=nd; }
@@ -720,7 +731,7 @@ function renderNav(){
       ${data.assets.length?`<span class="badge cnt">${data.assets.length}</span>`:'<span class="dot"></span>'}
     </div>
     <div class="navitem ${activeChapter==='brand'?'active':''}" data-act="goChapter" data-arg="brand">
-      <span class="ico">${icon('palette')}</span><span>Brand kit</span>
+      <span class="ico">${icon('palette')}</span><span>Vizuální styl</span>
       <span class="dot ${brandFilled()?'done':''}"></span>
     </div>
   </div>
@@ -771,7 +782,7 @@ function renderEditor(){
 const SECTOR_ORDER=['Nezisková organizace','Veřejný sektor','Podnikatelský sektor','Ostatní'];
 function renderOrgPicker(){
   const o=orgType();
-  let opts='<option value="">— vyberte typ organizace —</option>';
+  let opts='<option value="">vyberte typ organizace</option>';
   SECTOR_ORDER.forEach(sec=>{
     const inSec=ORG_TYPES.filter(t=>t.cat===sec);
     if(!inSec.length) return;
@@ -779,7 +790,7 @@ function renderOrgPicker(){
   });
   return `<div class="panel">
     <h2>Typ organizace</h2>
-    <p class="lead">Vyberte podle sektoru a právní formy — zobrazí se relevantní kapitoly a zákonné povinnosti.</p>
+    <p class="lead">Vyberte podle sektoru a právní formy, zobrazí se relevantní kapitoly a zákonné povinnosti.</p>
     <div class="field" style="max-width:520px;margin-bottom:0">
       <select data-act="orgType">${opts}</select>
     </div>
@@ -873,7 +884,7 @@ function financeDocsHTML(c){
   const rows=atts.map(a=>`<div class="docrow">${icon('fileText')}<span class="docname" title="${esc(a.name||'')}">${esc(a.name||'soubor')}</span><span class="pill opt">příloha</span><button class="btn ghost small" data-act="removeAsset" data-id="${a.id}" title="Odebrat">${icon('x')}</button></div>`).join('');
   return `<div class="chmedia">
     <div class="chmhead">${icon('barchart')} Účetní výkazy a přílohy</div>
-    <p class="muted" style="font-size:12.5px;margin:0 0 10px">Nahraj rozvahu, výsledovku, přílohu k účetní závěrce, výrok auditora apod. (PDF nebo sken). AI z nich vytáhne klíčové údaje do textu a kompletní výkazy přidá jako přílohy na konec PDF — jak vyžaduje zákon.</p>
+    <p class="muted" style="font-size:12.5px;margin:0 0 10px">Nahraj rozvahu, výsledovku, přílohu k účetní závěrce, výrok auditora apod. (PDF nebo sken). AI z nich vytáhne klíčové údaje do textu a kompletní výkazy přidá jako přílohy na konec PDF, jak vyžaduje zákon.</p>
     <label class="chupload">${icon('uploadCloud')} <span>Nahrát výkaz / přílohu</span>
       <input type="file" accept=".pdf,image/*,.xlsx,.xls" multiple data-chdoc="finance" style="display:none">
     </label>
@@ -940,9 +951,9 @@ function appendixHTML(){
     else if(a.mime==='application/pdf'){
       const pages=appendixCache[a.id];
       if(pages && pages[0]!=='__err__'){ pages.forEach((u,idx)=>{ h+=`<div class="apage">${idx===0?`<div class="aptitle">${esc(a.name||'')}</div>`:''}<img class="apimg" src="${u}"></div>`; }); }
-      else h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Náhled přílohy se připravuje — otevři záložku Náhled a chvíli počkej.</p></div>`;
+      else h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Náhled přílohy se připravuje, otevři záložku Náhled a chvíli počkej.</p></div>`;
     } else {
-      h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Tento typ souboru nelze vložit do PDF — přiložte ho samostatně.</p></div>`;
+      h+=`<div class="apage"><div class="aptitle">${esc(a.name||'')}</div><p class="muted">Tento typ souboru nelze vložit do PDF, přiložte ho samostatně.</p></div>`;
     }
   });
   return h+`</div>`;
@@ -970,8 +981,8 @@ function narrativeHTML(c){
   const out=esc(chapVal(c.id,n.outputKey));
   const isUvod=c.id==='uvod';
   const label = isUvod?'Doplňující poznámky (nepovinné)' : (c.id==='finance'?'Komentář k hospodaření':'Vaše poznámky (odrážky / fakta)');
-  const headHint = isUvod?'— úvodní slovo AI sestaví z ostatních kapitol; poznámky jsou nepovinné' : '— zadejte fakta, AI z nich vytvoří text';
-  const placeholder = isUvod?'Volitelně: na co letos zvlášť upozornit, komu jmenovitě poděkovat…' : '• co se dělo&#10;• klíčová čísla a výsledky&#10;• komu poděkovat / co zdůraznit';
+  const headHint = isUvod?'· úvodní slovo AI sestaví z ostatních kapitol; poznámky jsou nepovinné' : '· zadejte fakta, AI z nich vytvoří text';
+  const placeholder = isUvod?'Volitelně: na co letos zvlášť upozornit, komu jmenovitě poděkovat…' : (CH_NOTE_PH[c.id]||'• co se dělo&#10;• klíčová čísla a výsledky&#10;• komu poděkovat / co zdůraznit');
   const btnText = isUvod?'Vygenerovat úvodní slovo ze zprávy' : 'Vygenerovat text';
   return `<div class="notes-block">
     <div class="nbhead">${icon('notes')} <strong>${label}</strong> <span class="muted" style="font-size:12px">${headHint}</span></div>
@@ -1001,7 +1012,7 @@ function projectsHTML(c){
           data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="nazev" />
         <button class="btn ghost small" style="color:#b00" data-act="delProj" data-ch="${c.id}" data-i="${i}">${icon('x')}</button>
       </div>
-      <label class="projphoto" title="Fotka projektu">${p.photoId&&tmpURL[p.photoId]?`<img src="${tmpURL[p.photoId]}" alt="">`:`${icon('image')}<span>Přidat fotku projektu</span>`}<input type="file" accept="image/*" data-projphoto="${c.id}" data-i="${i}" style="display:none"></label>
+      ${projPhotosHTML(c.id,i,p)}
       <div class="field"><label>Poznámky (fakta v odrážkách)</label>
         <textarea placeholder="• cíl projektu&#10;• co se dělo&#10;• výsledky a čísla / dopad"
           data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="poznamky">${esc(p.poznamky||'')}</textarea>
@@ -1024,6 +1035,19 @@ function ensureItems(chId){ const d=(data.chapters[chId]=data.chapters[chId]||{}
 function addProj(chId){ ensureItems(chId).push({nazev:'',poznamky:'',popis:''}); persist(); renderEditor(); renderNav(); }
 function delProj(chId,i){ ensureItems(chId).splice(i,1); persist(); renderEditor(); renderNav(); }
 function updProj(chId,i,k,v){ ensureItems(chId)[i][k]=v; persist(); }
+function projPhotos(p){ if(!Array.isArray(p.photos)){ p.photos = p.photoId?[{id:p.photoId,caption:''}]:[]; if(p.photoId) delete p.photoId; } return p.photos; }
+function projPhotosHTML(ch,i,p){
+  const pics=projPhotos(p);
+  const thumbs=pics.map((ph,pi)=>{ const u=tmpURL[ph.id]||''; return `<div class="ppic">${u?`<img src="${u}" alt="">`:''}<button class="ppicdel" data-act="delProjPhoto" data-ch="${ch}" data-i="${i}" data-pi="${pi}" title="Odebrat">${icon('x')}</button><input type="text" class="ppiccap" placeholder="Popisek fotky" value="${esc(ph.caption||'')}" data-bind="projphoto" data-ch="${ch}" data-i="${i}" data-pi="${pi}" data-key="caption"></div>`; }).join('');
+  return `<div class="projphotos">${thumbs}<label class="projaddphoto" title="Přidat fotky">${icon('image')} <span>Přidat fotky</span><input type="file" accept="image/*" multiple data-projphotos="${ch}" data-i="${i}" style="display:none"></label></div>`;
+}
+async function handleProjPhotos(ch,i,files){
+  const p=ensureItems(ch)[i]; if(!p) return; const arr=projPhotos(p); let added=0;
+  for(const f of Array.from(files)){ if(!(f.type||'').startsWith('image/')) continue; const id=await uploadImageToIDB(f); arr.push({id,caption:''}); added++; }
+  if(added){ persist(); renderEditor(); flashSaved(); }
+}
+function delProjPhoto(ch,i,pi){ const p=ensureItems(ch)[i]; if(!p) return; const arr=projPhotos(p); const ph=arr[pi]; if(ph&&ph.id) IDB.del(ph.id); arr.splice(pi,1); persist(); renderEditor(); }
+function setProjPhotoCaption(ch,i,pi,val){ const p=ensureItems(ch)[i]; if(!p) return; const arr=projPhotos(p); if(arr[pi]){ arr[pi].caption=val; persist(); flashSaved(); } }
 
 /* osoby (s fotkou) + fotky projektů */
 async function uploadImageToIDB(file){ const id=genId(); await IDB.set(id,file); tmpURL[id]=URL.createObjectURL(file); return id; }
@@ -1060,8 +1084,8 @@ function renderMaterials(){
   const hasPdf=assets.some(a=>(a.mime||'')==='application/pdf');
   const photos=assets.filter(a=>a.kind==='photo'||(a.mime||'').startsWith('image/')).length;
   const score=Math.max(n?8:0, Math.min(100, n*18 + (hasPdf?25:0) + Math.min(photos,3)*5));
-  const level = n===0 ? '—' : (score>=70?'Bohaté':score>=40?'Dobrý základ':'Základní');
-  const hint = n===0 ? 'Nahrajte staré VZ a fotky — čím víc podkladů, tím konkrétnější výsledek AI.'
+  const level = n===0 ? 'žádné' : (score>=70?'Bohaté':score>=40?'Dobrý základ':'Základní');
+  const hint = n===0 ? 'Nahrajte staré VZ a fotky, čím víc podkladů, tím konkrétnější výsledek AI.'
     : (score>=70 ? 'Skvělé, AI má z čeho čerpat.' : (hasPdf?'Dobré. Přidejte i fotky k projektům.':'Tip: přidejte starou výroční zprávu (PDF) pro výrazně lepší výsledek.'));
   const thermo = `<div class="thermo">
     <div class="thlabel"><span>Bohatost podkladů</span><span>${level}</span></div>
@@ -1070,7 +1094,7 @@ function renderMaterials(){
   </div>`;
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Nahraj své podklady</h2></div>
-    <p class="lead">Nahrajte vše, co máte — starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
+    <p class="lead">Nahrajte vše, co máte, starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
     ${thermo}
     <div class="dropzone" id="dropzone">
       ${icon('uploadCloud')}
@@ -1105,7 +1129,7 @@ function photoPlaceHTML(){
       <div class="profields">
         <input type="text" placeholder="Popisek fotky" value="${esc(a.caption||'')}" data-bind="asset" data-id="${a.id}" data-key="caption">
         <div class="prorow2">
-          <select data-bind="asset" data-id="${a.id}" data-key="chapter"><option value="">— kapitola —</option>${chapsOpts(a)}</select>
+          <select data-bind="asset" data-id="${a.id}" data-key="chapter"><option value="">vyberte kapitolu</option>${chapsOpts(a)}</select>
           <select data-bind="asset" data-id="${a.id}" data-key="size">
             <option value="m" ${(!a.size||a.size==='m')?'selected':''}>Střední</option>
             <option value="s" ${a.size==='s'?'selected':''}>Malá</option>
@@ -1137,8 +1161,8 @@ function renderBrand(){
   const logoUrl = tmpURL[b.logoId]||b.logoUrl||'';
   const fonts=['','Plus Jakarta Sans','Inter','Poppins','Montserrat','Lora','Merriweather','Source Sans 3','Libre Franklin'];
   return `<div class="panel">
-    <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('palette')}</span>Brand kit</h2></div>
-    <p class="lead">Logo, barvy, font a tón textů, podle kterých se vykreslí výstupní zpráva. Stačí nahrát logo — barvy se z něj převezmou.</p>
+    <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('palette')}</span>Vizuální styl</h2></div>
+    <p class="lead">Logo, barvy, font a tón textů, podle kterých se vykreslí výstupní zpráva. Stačí nahrát logo, barvy se z něj převezmou.</p>
 
     <div class="field"><label>Logo</label>
       <div class="logo-row">
@@ -1166,7 +1190,7 @@ function renderBrand(){
     </div>
 
     <div class="field">
-      <label>Ton of voice — tón a styl textů <span class="help">promítne se do AI generování</span></label>
+      <label>Tón komunikace (styl textů) <span class="help">promítne se do AI generování</span></label>
       <textarea data-bind="brand" data-key="manualNotes" placeholder="Např.: vřelý a lidský tón, oslovujeme „vy", krátké věty, konkrétní příběhy, bez korporátních frází…">${esc(b.manualNotes||'')}</textarea>
       <div class="row" style="margin-top:8px">
         <label class="btn small" style="cursor:pointer">${icon('upload')} Nahrát dokument s tónem
@@ -1203,15 +1227,15 @@ function afterRender(){
   document.querySelectorAll('[data-personphoto]').forEach(inp=>{
     inp.addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f)return; const id=await uploadImageToIDB(f); const it=ensurePeople(inp.dataset.personphoto)[+inp.dataset.i]; if(it){ if(it.photoId) IDB.del(it.photoId); it.photoId=id; persist(); renderEditor(); flashSaved(); } });
   });
-  document.querySelectorAll('[data-projphoto]').forEach(inp=>{
-    inp.addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f)return; const id=await uploadImageToIDB(f); const it=ensureItems(inp.dataset.projphoto)[+inp.dataset.i]; if(it){ if(it.photoId) IDB.del(it.photoId); it.photoId=id; persist(); renderEditor(); flashSaved(); } });
+  document.querySelectorAll('[data-projphotos]').forEach(inp=>{
+    inp.addEventListener('change', e=>{ const f=e.target.files; if(f&&f.length) handleProjPhotos(inp.dataset.projphotos, +inp.dataset.i, f); });
   });
   document.querySelectorAll('[data-chdoc]').forEach(inp=>{
     inp.addEventListener('change', e=>{ const f=e.target.files; if(f&&f.length) handleChapterDocs(inp.dataset.chdoc, f); });
   });
 }
 
-/* Soubory se ukládají lokálně v prohlížeči (IndexedDB) — žádné placené úložiště. */
+/* Soubory se ukládají lokálně v prohlížeči (IndexedDB), žádné placené úložiště. */
 const IDB=(()=>{ let p; function db(){ return p||(p=new Promise((res,rej)=>{ const r=indexedDB.open('vz_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('f'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); })); }
   return {
     async set(k,v){ const d=await db(); return new Promise((res,rej)=>{ const t=d.transaction('f','readwrite'); t.objectStore('f').put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); },
@@ -1227,7 +1251,7 @@ async function hydrateAssets(){
   (data.assets||[]).forEach(a=>ids.add(a.id));
   if(data.brand&&data.brand.logoId) ids.add(data.brand.logoId);
   Object.values(data.chapters||{}).forEach(ch=>{
-    (ch.items||[]).forEach(it=>{ if(it.photoId) ids.add(it.photoId); });
+    (ch.items||[]).forEach(it=>{ if(it.photoId) ids.add(it.photoId); (it.photos||[]).forEach(ph=>{ if(ph.id) ids.add(ph.id); }); });
     (ch.people||[]).forEach(p=>{ if(p.photoId) ids.add(p.photoId); });
   });
   let changed=false;
@@ -1267,7 +1291,7 @@ function save(){ persist(); flashSaved(); toast('Uloženo ✓'); }
 
 async function expandCommon(curr, notes, pct){
   const tone=(data.brand&&data.brand.manualNotes||'').trim();
-  const sys=`Jsi editor výročních zpráv. Rozšiř dodaný text přibližně o ${pct} %: přidej detail, kontext a plynulejší přechody, ale NEVYMÝŠLEJ nová fakta (čísla, jména, výsledky ani události) — vyjdi jen z původních podkladů a stávajícího textu. Zachovej 1. osobu množného čísla a věcný tón. Vrať POUZE rozšířený text v odstavcích, bez nadpisů, uvozovek a komentářů.`+(tone?`\nTÓN: ${tone}`:'')+langDirective();
+  const sys=`Jsi editor výročních zpráv. Rozšiř dodaný text přibližně o ${pct} %: přidej detail, kontext a plynulejší přechody, ale NEVYMÝŠLEJ nová fakta (čísla, jména, výsledky ani události), vyjdi jen z původních podkladů a stávajícího textu. Zachovej 1. osobu množného čísla a věcný tón. Nepoužívej dlouhé pomlčky (em dash). Vrať POUZE rozšířený text v odstavcích, bez nadpisů, uvozovek a komentářů.`+(tone?`\nTÓN: ${tone}`:'')+langDirective();
   const usr=`KONTEXT:\n${orgContext()}\n\nPŮVODNÍ PODKLADY:\n${notes||'(žádné navíc)'}\n\nSTÁVAJÍCÍ TEXT:\n${curr}`;
   return await callClaude(sys,usr);
 }
@@ -1312,7 +1336,7 @@ async function extract(){
     const j=await res.json();
     applyExtraction(j.result);
     activeChapter=(visibleChapters()[0]||{}).id||'organizace';
-    renderAll(); toast('Hotovo — data roztříděna do kapitol ✓');
+    renderAll(); toast('Hotovo, data roztříděna do kapitol ✓');
   }catch(e){ toast('Chyba extrakce: '+e.message); }
   finally{ setBusy(btn,false); }
 }
@@ -1456,8 +1480,8 @@ async function generate(chId){
     const digest=assembleReportDigest();
     const extra=(chapVal('uvod','poznamky')||'').trim();
     const hasContent = digest.split('\n').length>1; // víc než jen řádek s názvem organizace
-    if(!hasContent && !extra){ toast('Nejdřív vyplňte ostatní kapitoly — úvodní slovo se generuje z nich.'); return; }
-    usr=`Napiš úvodní slovo (ředitele/předsedy) do výroční zprávy, cca 150–250 slov. Shrň uplynulý rok, vyzdvihni nejdůležitější výsledky a poděkuj. Vyjdi VÝHRADNĚ z následujících sestavených podkladů celé zprávy — neopakuj je doslova, ale shrň je do plynulého osobního úvodu.\n\nKONTEXT:\n${orgContext()}\n\nSESTAVENÉ PODKLADY ZPRÁVY:\n${digest}${extra?('\n\nDOPLŇUJÍCÍ POZNÁMKY OD UŽIVATELE:\n'+extra):''}`;
+    if(!hasContent && !extra){ toast('Nejdřív vyplňte ostatní kapitoly, úvodní slovo se generuje z nich.'); return; }
+    usr=`Napiš úvodní slovo (ředitele/předsedy) do výroční zprávy, cca 150–250 slov. Shrň uplynulý rok, vyzdvihni nejdůležitější výsledky a poděkuj. Vyjdi VÝHRADNĚ z následujících sestavených podkladů celé zprávy, neopakuj je doslova, ale shrň je do plynulého osobního úvodu.\n\nKONTEXT:\n${orgContext()}\n\nSESTAVENÉ PODKLADY ZPRÁVY:\n${digest}${extra?('\n\nDOPLŇUJÍCÍ POZNÁMKY OD UŽIVATELE:\n'+extra):''}`;
   } else {
     const notes=chapVal(chId,n.notesKey);
     if(!notes.trim()){ toast('Nejprve zadejte poznámky.'); return; }
@@ -1467,12 +1491,12 @@ async function generate(chId){
   const sys=`Jsi editor výročních zpráv českých organizací. Z dodaných faktů sestav věcný, čtivý a důstojný text v první osobě množného čísla (např. „realizovali jsme").
 PRAVIDLA:
 - Vycházej VÝHRADNĚ z dodaných podkladů a kontextu. Nikdy si nevymýšlej čísla, jména, data, výsledky, partnery ani události, které v podkladech nejsou.
-- Co není v podkladech, nedoplňuj. Když je faktů málo, napiš kratší text — nenafukuj ho vatou.
+- Co není v podkladech, nedoplňuj. Když je faktů málo, napiš kratší text, nenafukuj ho vatou.
 - Žádná klišé a fráze („v dnešní nelehké době", „jsme nesmírně hrdí", „jak všichni víme") a žádné prázdné superlativy bez opory ve faktech.
-- Piš přirozenou, gramaticky a stylisticky správnou češtinou; vyhni se typickým AI obratům, nadužívání pomlček a doslovným anglickým kalkům.
+- Piš přirozenou, gramaticky a stylisticky správnou češtinou; vyhni se typickým AI obratům, dlouhým pomlčkám (em dash) i doslovným anglickým kalkům.
 - Konkrétní před obecným: jména, čísla a výsledky z podkladů upřednostni.
-- Neoslovuj uživatele a nepiš poznámky o tom, že podklady chybí nebo jsou omezené. Když faktů není dost, napiš jen krátký věcný text z toho, co máš — text musí jít rovnou vložit do zprávy.
-- Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`+langDirective();
+- Neoslovuj uživatele a nepiš poznámky o tom, že podklady chybí nebo jsou omezené. Když faktů není dost, napiš jen krátký věcný text z toho, co máš, text musí jít rovnou vložit do zprávy.
+- Spisovná čeština. Vrať POUZE výsledný text v odstavcích, bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`+langDirective();
   try{
     const text=await callClaude(sys,usr);
     setChapVal(chId,n.outputKey,text);
@@ -1487,9 +1511,9 @@ async function generateProj(chId,i){
   const btn=document.getElementById(`genproj-${chId}-${i}`); setBusy(btn,true);
   const sys=`Jsi editor výročních zpráv. Z dodaných faktů napiš věcný popis projektu (1–2 odstavce) v první osobě množného čísla.
 - Vycházej JEN z dodaných podkladů; nevymýšlej si čísla, jména, výsledky ani události, které tam nejsou.
-- Když je faktů málo, buď stručný — žádná vata ani klišé.
+- Když je faktů málo, buď stručný, žádná vata ani klišé.
 - Neoslovuj uživatele a nepiš poznámky o chybějících podkladech; vrať jen text vložitelný rovnou do zprávy.
-- Spisovná čeština, vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`+langDirective();
+- Spisovná čeština, nepoužívej dlouhé pomlčky (em dash). Vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`+langDirective();
   const usr=`Napiš souvislý popis projektu/aktivity do výroční zprávy (cca 80–140 slov). Zdůrazni cíl, co se dělo a výsledky/dopad.\n\nKONTEXT:\n${orgContext()}\n\nNázev projektu: ${p.nazev||'(bez názvu)'}\nPodklady:\n${p.poznamky}`;
   try{
     const text=await callClaude(sys,usr);
@@ -1575,13 +1599,13 @@ function reportPeople(chId){
 }
 function sectionProjects(c){
   const items=(data.chapters[c.id]||{}).items||[];
-  const filled=items.filter(p=>(p.nazev||p.popis||p.poznamky||p.photoId||'').toString().trim());
+  const filled=items.filter(p=>(p.nazev||p.popis||p.poznamky||projPhotos(p).length));
   if(!filled.length) return '';
   let h=`<h2>${esc(chLabel(c))}</h2>`;
   filled.forEach(p=>{
     if(p.nazev) h+=`<h3>${esc(p.nazev)}</h3>`;
-    const url=p.photoId?(tmpURL[p.photoId]||''):'';
-    if(url) h+=`<div class="rgallery"><figure><img src="${url}" alt=""></figure></div>`;
+    const pics=projPhotos(p).map(ph=>{ const u=tmpURL[ph.id]||''; if(!u) return ''; return `<figure><img src="${u}" alt="">${ph.caption?`<figcaption>${esc(ph.caption)}</figcaption>`:''}</figure>`; }).filter(Boolean);
+    if(pics.length) h+=`<div class="rgallery">${pics.join('')}</div>`;
     h+=paras(p.popis||p.poznamky);
   });
   return h;
@@ -1657,6 +1681,7 @@ document.addEventListener('click', e=>{
     case 'addPerson': addPerson(el.dataset.ch); break;
     case 'delPerson': delPerson(el.dataset.ch, +el.dataset.i); break;
     case 'financeAI': financeAI(); break;
+    case 'delProjPhoto': delProjPhoto(el.dataset.ch, +el.dataset.i, +el.dataset.pi); break;
   }
 });
 document.addEventListener('change', e=>{
@@ -1673,6 +1698,7 @@ document.addEventListener('input', e=>{
   if(el.matches('[data-bind="chap"]')){ setChapVal(el.dataset.ch, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="proj"]')){ updProj(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="person"]')){ setPersonProp(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
+  else if(el.matches('[data-bind="projphoto"]')){ setProjPhotoCaption(el.dataset.ch, +el.dataset.i, +el.dataset.pi, el.value); }
   else if(el.matches('input[type=text][data-bind="asset"]')){ setAssetProp(el.dataset.id, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); }
   else if(el.matches('[data-renamedoc]')){ renameDoc(el.dataset.renamedoc, el.value); }

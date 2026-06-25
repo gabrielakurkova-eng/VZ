@@ -25,7 +25,7 @@ export async function onRequestPost(context) {
   aContent.push({ type: 'text', text: TASK });
   gParts.push({ text: TASK });
 
-  const system = 'Jsi účetní asistent. Z výkazů vytěžíš klíčové finanční údaje. Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš, co nelze určit, necháš prázdné. Komentář piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů.';
+  const system = 'Jsi účetní asistent. Z výkazů vytěžíš klíčové finanční údaje. Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš, co nelze určit, necháš prázdné. Komentář piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů; nepoužívej dlouhé pomlčky (em dash).';
 
   let lastErr = '';
   if (env.ANTHROPIC_API_KEY) {
