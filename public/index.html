@@ -152,7 +152,7 @@
 
   /* ---- report (preview) ---- */
   .report{background:#fff;max-width:840px;margin:0 auto;padding:0 0 60px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg);font-family:var(--sans);color:#1e293b;overflow:hidden}
-  .report .cover{padding:60px 64px 42px;background:linear-gradient(135deg,#f3fbf9 0%, #eaf3fb 100%);border-bottom:1px solid var(--line);margin-bottom:8px}
+  .report .cover{padding:60px 64px 42px;background:linear-gradient(135deg, var(--rcoverbg,#f6f8fb) 0%, var(--rcoverbg2,#eef2f6) 100%);border-bottom:1px solid var(--line);margin-bottom:8px}
   .report .cover .kicker{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin-bottom:10px}
   .report .cover .year{font-family:var(--disp);font-size:72px;font-weight:800;line-height:.95;letter-spacing:-.03em;color:#0b1220;margin-bottom:14px}
   .report .cover .org{font-family:var(--disp);font-size:26px;font-weight:700;color:#0b1220}
@@ -205,10 +205,10 @@
   /* ---- branding výstupu ---- */
   .report{font-family:var(--rfont,var(--sans))}
   .report h1,.report h2,.report h3,.report .cover .year,.report .cover .org{font-family:var(--rfont,var(--disp))}
-  .report .cover .kicker{color:var(--rbrand,var(--brand))}
+  .report .cover .kicker{color:var(--rbrand-ink,var(--brand-ink))}
   .report .cover .rule{background:linear-gradient(90deg,var(--rbrand,var(--brand2)),var(--rbrand2,var(--brand)))}
   .report h2::before{background:linear-gradient(var(--rbrand,var(--brand2)),var(--rbrand2,var(--brand)))}
-  .report .fin tr:last-child td{color:var(--rbrand2,var(--brand-ink))}
+  .report .fin tr:last-child td{background:var(--rcoverbg,var(--brand-soft));color:var(--rbrand-ink,var(--brand-ink))}
   .report .cover-logo{max-height:56px;max-width:230px;margin-bottom:18px;display:block}
   .report .rgallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:8px 0 18px}
   .report .rgallery figure{margin:0}
@@ -236,7 +236,7 @@
     .app{max-width:none;padding:0}
     .noprint{display:none !important}
     .report{border:0;box-shadow:none;border-radius:0;max-width:none;margin:0;padding:0}
-    .report .cover{background:#fff;border-bottom:2px solid var(--brand);padding:0 0 28px;margin-bottom:24px}
+    .report .cover{background:#fff;border-bottom:2px solid var(--rbrand,var(--brand));padding:0 0 28px;margin-bottom:24px}
     .report .body{padding:0}
     .report .fin tr:last-child td{background:#f4f7fa !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
@@ -468,7 +468,9 @@ let tab='editor';
 const tmpURL = {}; // přechodné objectURL (id -> url) pro tuto relaci
 
 data.assets = data.assets || [];
-data.brand = Object.assign({ primary:'#0d9488', secondary:'#0f766e', font:'', logoId:'', logoUrl:'', manualNotes:'', manualId:'' }, data.brand || {});
+data.brand = Object.assign({ primary:'#334155', secondary:'#1e293b', font:'', logoId:'', logoUrl:'', manualNotes:'', manualId:'' }, data.brand || {});
+// migrace: stará výchozí zelená → neutrální (dokud není logo/vlastní barva)
+if(!data.brand.logoId && (data.brand.primary||'').toLowerCase()==='#0d9488'){ data.brand.primary='#334155'; data.brand.secondary='#1e293b'; }
 if(!data.project){ data.project = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('p'+Date.now()+Math.round(Math.random()*1e6)); }
 
 function load(k,def){ try{ return Object.assign(def, JSON.parse(localStorage.getItem(k))||{}); }catch(e){ return def; } }
@@ -832,8 +834,12 @@ async function handleLogo(file){
   const id='logo-'+uuid();
   try{ await IDB.set(id, file); }catch(e){ toast('Logo se nepodařilo uložit: '+e.message); return; }
   if(data.brand.logoId) IDB.del(data.brand.logoId);
-  tmpURL[id]=URL.createObjectURL(file); data.brand.logoId=id; data.brand.logoUrl='';
+  const objurl=URL.createObjectURL(file);
+  tmpURL[id]=objurl; data.brand.logoId=id; data.brand.logoUrl='';
   persist(); applyBrand(); renderEditor(); renderNav();
+  // automaticky vytáhni barvy z loga
+  const cols=await extractLogoColors(objurl);
+  if(cols){ data.brand.primary=cols.primary; data.brand.secondary=cols.secondary; persist(); applyBrand(); renderEditor(); toast('Barvy převzaty z loga ✓'); }
 }
 
 function removeAsset(id){ IDB.del(id); data.assets=(data.assets||[]).filter(a=>a.id!==id); persist(); renderEditor(); renderNav(); }
@@ -918,10 +924,60 @@ function applyExtraction(r){
 
 function applyBrand(){
   const b=data.brand||{}; const root=document.documentElement.style;
-  root.setProperty('--rbrand', b.primary||'#0d9488');
-  root.setProperty('--rbrand2', b.secondary||b.primary||'#0f766e');
+  const primary=b.primary||'#334155';
+  const secondary=b.secondary||darken(primary,0.25);
+  root.setProperty('--rbrand', primary);
+  root.setProperty('--rbrand2', secondary);
+  root.setProperty('--rbrand-ink', textInk(primary));
+  root.setProperty('--rcoverbg', lighten(primary,0.90));
+  root.setProperty('--rcoverbg2', lighten(secondary,0.88));
   if(b.font){ ensureFont(b.font); root.setProperty('--rfont', `"${b.font}", var(--sans)`); }
   else root.removeProperty('--rfont');
+}
+
+/* --- práce s barvami + extrakce barev z loga --- */
+function hexToRgb(h){ h=(h||'').replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); const n=parseInt(h||'0',16)||0; return [n>>16&255,n>>8&255,n&255]; }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0')).join(''); }
+function lighten(hex,a){ const [r,g,b]=hexToRgb(hex); return rgbToHex(r+(255-r)*a, g+(255-g)*a, b+(255-b)*a); }
+function darken(hex,a){ const [r,g,b]=hexToRgb(hex); return rgbToHex(r*(1-a), g*(1-a), b*(1-a)); }
+function luminance(hex){ const [r,g,b]=hexToRgb(hex); return (0.2126*r+0.7152*g+0.0722*b)/255; }
+function textInk(hex){ return luminance(hex)>0.62 ? darken(hex,0.45) : hex; }
+function colorDist(a,b){ const x=hexToRgb(a),y=hexToRgb(b); return Math.sqrt((x[0]-y[0])**2+(x[1]-y[1])**2+(x[2]-y[2])**2); }
+
+function extractLogoColors(url){
+  return new Promise((res)=>{
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{
+      try{
+        const S=64, cv=document.createElement('canvas'); cv.width=S; cv.height=S;
+        const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,S,S);
+        const d=ctx.getImageData(0,0,S,S).data, buckets={};
+        for(let i=0;i<d.length;i+=4){
+          const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+          if(a<128) continue;
+          const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+          if(mx>238&&mn>238) continue;   // skoro bílá
+          if(mx<22) continue;            // skoro černá
+          if(mx-mn<18) continue;         // skoro šedá
+          const key=(r>>4)+'-'+(g>>4)+'-'+(b>>4);
+          const bk=buckets[key]||(buckets[key]={r:0,g:0,b:0,n:0,sat:0});
+          bk.r+=r; bk.g+=g; bk.b+=b; bk.n++; bk.sat+=(mx-mn);
+        }
+        const arr=Object.values(buckets);
+        if(!arr.length){ res(null); return; }
+        arr.forEach(bk=>{ bk.score=bk.n*(1+(bk.sat/bk.n)/255); });
+        arr.sort((x,y)=>y.score-x.score);
+        const avg=bk=>rgbToHex(bk.r/bk.n,bk.g/bk.n,bk.b/bk.n);
+        const primary=avg(arr[0]);
+        let secondary=null;
+        for(let i=1;i<arr.length;i++){ const c=avg(arr[i]); if(colorDist(c,primary)>60){ secondary=c; break; } }
+        if(!secondary) secondary=darken(primary,0.25);
+        res({primary,secondary});
+      }catch(e){ res(null); }
+    };
+    img.onerror=()=>res(null);
+    img.src=url;
+  });
 }
 function ensureFont(name){
   const id='gf-'+name.replace(/\s+/g,'-');
