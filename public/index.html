@@ -859,6 +859,7 @@ PRAVIDLA:
 - Co není v podkladech, nedoplňuj. Když je faktů málo, napiš kratší text — nenafukuj ho vatou.
 - Žádná klišé a fráze („v dnešní nelehké době", „jsme nesmírně hrdí", „jak všichni víme") a žádné prázdné superlativy bez opory ve faktech.
 - Konkrétní před obecným: jména, čísla a výsledky z podkladů upřednostni.
+- Neoslovuj uživatele a nepiš poznámky o tom, že podklady chybí nebo jsou omezené. Když faktů není dost, napiš jen krátký věcný text z toho, co máš — text musí jít rovnou vložit do zprávy.
 - Spisovná čeština. Vrať POUZE výsledný text v odstavcích — bez nadpisů, odrážek, uvozovek, markdownu a bez jakýchkoli komentářů o tom, co píšeš.`;
   const usr=`${n.hint}\n\nKONTEXT ORGANIZACE:\n${orgContext()}\n\nPODKLADY (odrážky od uživatele) pro kapitolu „${c.label}":\n${notes}`;
   try{
@@ -876,6 +877,7 @@ async function generateProj(chId,i){
   const sys=`Jsi editor výročních zpráv. Z dodaných faktů napiš věcný popis projektu (1–2 odstavce) v první osobě množného čísla.
 - Vycházej JEN z dodaných podkladů; nevymýšlej si čísla, jména, výsledky ani události, které tam nejsou.
 - Když je faktů málo, buď stručný — žádná vata ani klišé.
+- Neoslovuj uživatele a nepiš poznámky o chybějících podkladech; vrať jen text vložitelný rovnou do zprávy.
 - Spisovná čeština, vrať POUZE souvislý text bez nadpisů, odrážek a uvozovek.`;
   const usr=`Napiš souvislý popis projektu/aktivity do výroční zprávy (cca 80–140 slov). Zdůrazni cíl, co se dělo a výsledky/dopad.\n\nKONTEXT:\n${orgContext()}\n\nNázev projektu: ${p.nazev||'(bez názvu)'}\nPodklady:\n${p.poznamky}`;
   try{
