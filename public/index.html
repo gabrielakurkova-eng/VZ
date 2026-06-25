@@ -76,7 +76,7 @@
 
   /* ---- layout ---- */
   .layout{display:grid;grid-template-columns:264px 1fr;gap:24px;align-items:start}
-  @media(max-width:860px){.layout{grid-template-columns:1fr}}
+  @media(max-width:860px){.layout{grid-template-columns:1fr}.nav{position:static;top:auto}}
 
   /* ---- sidebar nav ---- */
   .nav{position:sticky;top:88px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
@@ -175,6 +175,10 @@
   .report .fin tr:last-child td{border-bottom:0;background:var(--brand-soft);font-weight:700;color:var(--brand-ink)}
   .report .fin td.num{text-align:right;font-variant-numeric:tabular-nums}
   .report .empty{color:#aab4c0;font-style:italic;padding:40px 64px}
+  .report-empty{text-align:center;padding:64px 28px;color:var(--muted)}
+  .report-empty .re-ico{width:56px;height:56px;border-radius:16px;margin:0 auto 16px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+  .report-empty .re-ico .ic{width:28px;height:28px}
+  .report-empty p{font-size:14.5px;max-width:380px;margin:0 auto 18px}
   .preview-toolbar{max-width:840px;margin:0 auto 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
   /* ---- materiály ---- */
@@ -734,6 +738,7 @@ function renameDoc(id,name){ const it=docs.list.find(x=>x.id===id); if(it){ it.n
 
 function renderDocs(){
   const sel=document.getElementById('docselect'); if(!sel) return;
+  sel.style.display = docs.list.length>1 ? '' : 'none'; // při jediné zprávě nemá smysl přepínač
   sel.innerHTML=docs.list.map(d=>`<option value="${d.id}" ${d.id===docs.currentId?'selected':''}>${esc(d.name||'Bez názvu')}</option>`).join('');
 }
 function renderLang(){
@@ -745,7 +750,7 @@ function renderDocsSettings(){
   el.innerHTML=docs.list.map(d=>`<div class="docitem">
     <input type="text" value="${esc(d.name||'')}" data-renamedoc="${d.id}" />
     ${d.id===docs.currentId?'<span class="pill opt">otevřená</span>':`<button class="btn small" data-act="opendoc" data-id="${d.id}">Otevřít</button>`}
-    <button class="btn ghost small" data-act="deldoc" data-id="${d.id}" style="color:#b00">${icon('trash')}</button>
+    <button class="btn ghost small" data-act="deldoc" data-id="${d.id}" style="color:#b00" title="Smazat zprávu" aria-label="Smazat zprávu">${icon('trash')}</button>
   </div>`).join('');
 }
 
@@ -1116,7 +1121,7 @@ function projectsHTML(c){
       <div class="ptitle">
         <input type="text" placeholder="Název projektu / aktivity" value="${esc(p.nazev||'')}"
           data-bind="proj" data-ch="${c.id}" data-i="${i}" data-key="nazev" />
-        <button class="btn ghost small" style="color:#b00" data-act="delProj" data-ch="${c.id}" data-i="${i}">${icon('x')}</button>
+        <button class="btn ghost small" style="color:#b00" data-act="delProj" data-ch="${c.id}" data-i="${i}" title="Smazat projekt" aria-label="Smazat projekt">${icon('x')}</button>
       </div>
       ${projPhotosHTML(c.id,i,p)}
       <div class="field"><label>Poznámky (fakta v odrážkách)</label>
@@ -1609,6 +1614,7 @@ PRAVIDLA:
     const text=await callClaude(sys,usr);
     setChapVal(chId,n.outputKey,text);
     renderEditor(); renderNav(); toast('Text vygenerován ✓');
+    setTimeout(()=>{ const o=document.getElementById('out-'+chId); if(o) o.scrollIntoView({block:'center',behavior:'smooth'}); },60);
   }catch(e){ toast('Chyba: '+e.message); }
   finally{ setBusy(btn,false); }
 }
@@ -1627,6 +1633,7 @@ async function generateProj(chId,i){
     const text=await callClaude(sys,usr);
     updProj(chId,i,'popis',text);
     renderEditor(); renderNav(); toast('Popis vygenerován ✓');
+    setTimeout(()=>{ const o=document.getElementById(`outproj-${chId}-${i}`); if(o) o.scrollIntoView({block:'center',behavior:'smooth'}); },60);
   }catch(e){ toast('Chyba: '+e.message); }
   finally{ setBusy(btn,false); }
 }
@@ -1652,7 +1659,17 @@ function setBusy(btn,b){ if(!btn)return; if(!btn.dataset.lbl) btn.dataset.lbl=bt
 /* ============================================================ NÁHLED ============================================================ */
 function renderReport(){
   const r=document.getElementById('report');
-  if(!data.orgType){ r.innerHTML='<p class="empty">Nejprve vyberte typ organizace a vyplňte údaje v editoru.</p>'; return; }
+  const tb=document.querySelectorAll('#view-preview .preview-toolbar');
+  if(!data.orgType){
+    tb.forEach(t=>t.style.display='none'); // není co tisknout
+    r.innerHTML=`<div class="report-empty">
+      <div class="re-ico">${icon('fileText')}</div>
+      <p>Zatím není co zobrazit. Nejdřív vyberte typ organizace a vyplňte údaje v editoru.</p>
+      <button class="btn primary" data-act="tab" data-arg="editor">Přejít do editoru</button>
+    </div>`;
+    return;
+  }
+  tb.forEach(t=>t.style.display='');
   const og=data.chapters.organizace||{};
   const o=orgType();
   const logoUrl = tmpURL[data.brand.logoId]||data.brand.logoUrl||'';
@@ -1789,7 +1806,7 @@ function shouldWelcome(){
   return true;
 }
 function maybeWelcome(){ if(!localStorage.getItem('vz_access')) return; if(shouldWelcome()) showWelcome(); }
-function showWelcome(){ const w=document.getElementById('welcome'); if(w) w.style.display='flex'; }
+function showWelcome(){ const w=document.getElementById('welcome'); if(w){ w.style.display='flex'; const b=document.getElementById('welcomebtn'); if(b) setTimeout(()=>{ try{ b.focus(); }catch(e){} },60); } }
 function hideWelcome(){ const w=document.getElementById('welcome'); if(w) w.style.display='none'; }
 function startFirstReport(){
   localStorage.setItem('vz_welcomed','1'); hideWelcome();
