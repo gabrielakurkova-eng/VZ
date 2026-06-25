@@ -1,0 +1,12 @@
+name = "vyrocni-zprava"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "public"
+
+# Úložiště nahraných souborů (staré VZ, fotky, logo, grafický manuál)
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "vyrocni-zprava-assets"
+
+# Tajný klíč nastavíte mimo tento soubor:
+#   wrangler pages secret put ANTHROPIC_API_KEY
+# (lokálně: do souboru .dev.vars řádek  ANTHROPIC_API_KEY=sk-ant-...)

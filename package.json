@@ -1,0 +1,13 @@
+{
+  "name": "vyrocni-zprava",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Generátor výroční zprávy pro organizace (Cloudflare Pages + Functions + R2)",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
