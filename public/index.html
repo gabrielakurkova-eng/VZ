@@ -182,7 +182,12 @@
   .preview-toolbar{max-width:840px;margin:0 auto 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
   /* ---- materiály ---- */
-  .navspecial{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .navspecial{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .navspecial .navitem{background:var(--brand-soft);border:1px solid var(--brand-soft2);font-weight:600;margin-bottom:8px}
+  .navspecial .navitem:last-child{margin-bottom:0}
+  .navspecial .navitem .ico{color:var(--brand)}
+  .navspecial .navitem:hover{background:var(--brand-soft2);border-color:#bfe9df}
+  .navspecial .navitem.active{background:var(--brand-soft2);border-color:var(--brand2)}
   .nav .navitem .badge.cnt{background:var(--brand);color:#fff}
   .dropzone{border:2px dashed #cfe6e0;border-radius:14px;padding:30px 20px;text-align:center;cursor:pointer;background:linear-gradient(180deg,var(--brand-soft),#fff);transition:all .15s;color:var(--brand)}
   .dropzone:hover,.dropzone.drag{border-color:var(--brand);background:var(--brand-soft2)}
