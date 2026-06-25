@@ -264,6 +264,14 @@
   .chthumb{width:60px;height:60px;object-fit:cover;border-radius:9px;flex:none;background:#eef2f6}
   .chfields{flex:1;min-width:0}
   .chfields input[type=text]{margin-bottom:8px}
+  /* compliance štítek + přepínač/správa zpráv */
+  .legaltag{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#3f6b54;background:#eef7f1;border:1px solid #cfe6d8;border-radius:8px;padding:6px 10px;margin-bottom:10px}
+  .legaltag .ic{width:14px;height:14px;color:#2f7d4f;flex:none}
+  .docbar{display:flex;align-items:center;gap:8px}
+  .docbar select{width:auto;max-width:210px;padding:8px 30px 8px 11px;font-size:13.5px;font-family:var(--sans)}
+  .docitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .docitem input{flex:1;min-width:0}
+  .docitem .btn .ic{width:14px;height:14px}
 
   @media print{
     body{background:#fff}
@@ -292,6 +300,10 @@
       <div class="brand">Generátor výročních zpráv<small>Praktická aplikace pro organizace i firmy</small></div>
     </div>
     <div class="spacer"></div>
+    <div class="docbar noprint">
+      <select id="docselect" title="Přepnout zprávu"></select>
+      <button class="btn small" data-act="newdoc">+ Nová</button>
+    </div>
     <span id="savestatus" class="savestatus noprint"></span>
     <div class="tabs">
       <button id="tab-editor" class="active" data-act="tab" data-arg="editor">Editor</button>
@@ -333,6 +345,12 @@
           <option value="claude-haiku-4-5">Claude Haiku 4.5 — nejlevnější</option>
         </select>
       </div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
+      <h3 style="margin:0 0 6px">Vaše zprávy</h3>
+      <p class="keyhint" style="margin:0 0 12px">Můžeš mít rozpracovaných víc zpráv (např. pro různé organizace) a kdykoli se k nim vrátit. Přejmenuj je přímo v políčku.</p>
+      <div id="docsmgr"></div>
+      <button class="btn" data-act="newdoc" style="margin-top:12px">+ Nová zpráva</button>
 
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
       <h3 style="margin:0 0 10px">Data</h3>
@@ -495,22 +513,85 @@ const ICONS={
 function icon(n,cls){ const p=ICONS[n]; if(!p) return ''; return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`; }
 
 /* ============================================================ STAV ============================================================ */
-const LS_DATA='vz_mvp_data_v1', LS_CFG='vz_mvp_cfg_v2';
-let data = load(LS_DATA, { orgType:'', chapters:{} });
-let cfg  = load(LS_CFG,  { apikey:'', model:'claude-sonnet-4-6' });
+const LS_DOCS='vz_docs_v1', LS_CFG='vz_mvp_cfg_v2', DOC_PREFIX='vz_d_';
 let activeChapter = 'organizace';
 let tab='editor';
 const tmpURL = {}; // přechodné objectURL (id -> url) pro tuto relaci
 
-data.assets = data.assets || [];
-data.brand = Object.assign({ primary:'#334155', secondary:'#1e293b', font:'', logoId:'', logoUrl:'', manualNotes:'', manualId:'' }, data.brand || {});
-// migrace: stará výchozí zelená → neutrální (dokud není logo/vlastní barva)
-if(!data.brand.logoId && (data.brand.primary||'').toLowerCase()==='#0d9488'){ data.brand.primary='#334155'; data.brand.secondary='#1e293b'; }
-if(!data.project){ data.project = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('p'+Date.now()+Math.round(Math.random()*1e6)); }
-
 function load(k,def){ try{ return Object.assign(def, JSON.parse(localStorage.getItem(k))||{}); }catch(e){ return def; } }
-function persist(){ localStorage.setItem(LS_DATA, JSON.stringify(data)); }
+let cfg = load(LS_CFG, { apikey:'', model:'claude-sonnet-4-6' });
+
+function genId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id'+Date.now()+Math.round(Math.random()*1e6)); }
+function hydrateDoc(d){
+  d = (d && typeof d==='object') ? d : {};
+  d.chapters = d.chapters || {}; d.assets = d.assets || []; if(typeof d.orgType!=='string') d.orgType='';
+  d.brand = Object.assign({ primary:'#334155', secondary:'#1e293b', font:'', logoId:'', logoUrl:'', manualNotes:'' }, d.brand || {});
+  if(!d.brand.logoId && (d.brand.primary||'').toLowerCase()==='#0d9488'){ d.brand.primary='#334155'; d.brand.secondary='#1e293b'; }
+  if(!d.project) d.project = genId();
+  return d;
+}
+function defaultDoc(){ return hydrateDoc({ orgType:'', chapters:{} }); }
+function deriveName(d){ const og=(d&&d.chapters&&d.chapters.organizace)||{}; return (og.nazev||'').trim() || 'Nová zpráva'; }
+function loadDoc(id){ let d; try{ d=JSON.parse(localStorage.getItem(DOC_PREFIX+id)); }catch(e){} return d || { orgType:'', chapters:{} }; }
+
+function loadDocsIndex(){
+  let idx; try{ idx=JSON.parse(localStorage.getItem(LS_DOCS)); }catch(e){}
+  if(!idx || !Array.isArray(idx.list) || !idx.list.length){
+    let old=null; try{ old=JSON.parse(localStorage.getItem('vz_mvp_data_v1')); }catch(e){}
+    const id=genId(); const d=hydrateDoc(old || { orgType:'', chapters:{} });
+    localStorage.setItem(DOC_PREFIX+id, JSON.stringify(d));
+    idx={ currentId:id, list:[{ id, name:deriveName(d) }] };
+    localStorage.setItem(LS_DOCS, JSON.stringify(idx));
+  }
+  return idx;
+}
+let docs = loadDocsIndex();
+let data = hydrateDoc(loadDoc(docs.currentId));
+
+function persist(){
+  localStorage.setItem(DOC_PREFIX+docs.currentId, JSON.stringify(data));
+  const it=docs.list.find(x=>x.id===docs.currentId);
+  if(it && (!it.name || it.name==='Nová zpráva')) it.name=deriveName(data);
+  localStorage.setItem(LS_DOCS, JSON.stringify(docs));
+}
 function persistCfg(){ localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
+
+function newDoc(){
+  const id=genId(); const d=defaultDoc();
+  localStorage.setItem(DOC_PREFIX+id, JSON.stringify(d));
+  docs.list.push({ id, name:'Nová zpráva' }); docs.currentId=id; localStorage.setItem(LS_DOCS, JSON.stringify(docs));
+  data=d; activeChapter='organizace'; setTab('editor'); applyBrand(); renderAll(); hydrateAssets(); toast('Nová zpráva vytvořena ✓');
+}
+function switchDoc(id){
+  if(!id || id===docs.currentId) return;
+  docs.currentId=id; localStorage.setItem(LS_DOCS, JSON.stringify(docs));
+  data=hydrateDoc(loadDoc(id)); activeChapter='organizace'; setTab('editor'); applyBrand(); renderAll(); hydrateAssets();
+}
+function deleteDoc(id){
+  const it=docs.list.find(x=>x.id===id); if(!it) return;
+  if(!confirm('Opravdu smazat zprávu „'+(it.name||'Bez názvu')+'"? Nelze vrátit zpět.')) return;
+  try{ const dd=loadDoc(id); (dd.assets||[]).forEach(a=>IDB.del(a.id)); if(dd.brand&&dd.brand.logoId) IDB.del(dd.brand.logoId); }catch(e){}
+  localStorage.removeItem(DOC_PREFIX+id);
+  docs.list=docs.list.filter(x=>x.id!==id);
+  if(!docs.list.length){ const nid=genId(); const nd=defaultDoc(); localStorage.setItem(DOC_PREFIX+nid, JSON.stringify(nd)); docs.list.push({id:nid,name:'Nová zpráva'}); docs.currentId=nid; data=nd; }
+  else if(docs.currentId===id){ docs.currentId=docs.list[0].id; data=hydrateDoc(loadDoc(docs.currentId)); }
+  localStorage.setItem(LS_DOCS, JSON.stringify(docs));
+  activeChapter='organizace'; applyBrand(); renderAll(); hydrateAssets(); renderDocsSettings(); toast('Zpráva smazána.');
+}
+function renameDoc(id,name){ const it=docs.list.find(x=>x.id===id); if(it){ it.name=(name||'').trim()||'Bez názvu'; localStorage.setItem(LS_DOCS, JSON.stringify(docs)); renderDocs(); } }
+
+function renderDocs(){
+  const sel=document.getElementById('docselect'); if(!sel) return;
+  sel.innerHTML=docs.list.map(d=>`<option value="${d.id}" ${d.id===docs.currentId?'selected':''}>${esc(d.name||'Bez názvu')}</option>`).join('');
+}
+function renderDocsSettings(){
+  const el=document.getElementById('docsmgr'); if(!el) return;
+  el.innerHTML=docs.list.map(d=>`<div class="docitem">
+    <input type="text" value="${esc(d.name||'')}" data-renamedoc="${d.id}" />
+    ${d.id===docs.currentId?'<span class="pill opt">otevřená</span>':`<button class="btn small" data-act="opendoc" data-id="${d.id}">Otevřít</button>`}
+    <button class="btn ghost small" data-act="deldoc" data-id="${d.id}" style="color:#b00">${icon('trash')}</button>
+  </div>`).join('');
+}
 
 function chapVal(chId, key){ return (data.chapters[chId]||{})[key] ?? ''; }
 function setChapVal(chId, key, val){ (data.chapters[chId]=data.chapters[chId]||{})[key]=val; persist(); }
@@ -533,7 +614,7 @@ function setTab(t){
   document.getElementById('view-settings').style.display = t==='settings'?'block':'none';
   ['editor','preview','settings'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   if(t==='preview') renderReport();
-  if(t==='settings'){ document.getElementById('model').value=cfg.model; }
+  if(t==='settings'){ document.getElementById('model').value=cfg.model; renderDocsSettings(); }
 }
 
 /* ============================================================ NAV ============================================================ */
@@ -597,18 +678,25 @@ function renderEditor(){
   afterRender();
 }
 
+const SECTOR_ORDER=['Nezisková organizace','Veřejný sektor','Podnikatelský sektor','Ostatní'];
 function renderOrgPicker(){
   const o=orgType();
-  const opts = ['<option value="">— vyberte typ organizace —</option>']
-    .concat(ORG_TYPES.map(t=>`<option value="${t.id}" ${t.id===data.orgType?'selected':''}>${t.label} · ${t.cat}</option>`))
-    .join('');
+  let opts='<option value="">— vyberte typ organizace —</option>';
+  SECTOR_ORDER.forEach(sec=>{
+    const inSec=ORG_TYPES.filter(t=>t.cat===sec);
+    if(!inSec.length) return;
+    opts+=`<optgroup label="${sec}">`+inSec.map(t=>`<option value="${t.id}" ${t.id===data.orgType?'selected':''}>${t.label}</option>`).join('')+`</optgroup>`;
+  });
   return `<div class="panel">
     <h2>Typ organizace</h2>
-    <p class="lead">Podle typu se zobrazí relevantní kapitoly a vyznačí zákonné povinnosti.</p>
+    <p class="lead">Vyberte podle sektoru a právní formy — zobrazí se relevantní kapitoly a zákonné povinnosti.</p>
     <div class="field" style="max-width:520px;margin-bottom:0">
       <select data-act="orgType">${opts}</select>
     </div>
-    ${o?`<div class="legalnote" style="margin-top:14px"><b>${o.label}:</b> ${o.note}</div>`:''}
+    ${o?`<div class="legalnote" style="margin-top:14px">
+      <div class="legaltag">${icon('check')} Struktura zprávy je připravena v souladu s platnou legislativou ČR</div>
+      <b>${o.label}:</b> ${o.note}
+    </div>`:''}
   </div>`;
 }
 
@@ -1277,7 +1365,7 @@ function importJSON(file){
   rd.readAsText(file);
 }
 function resetAll(){ if(confirm('Opravdu vymazat všechna data této zprávy?')){ data={orgType:'',chapters:{}}; persist(); activeChapter='organizace'; renderAll(); toast('Vymazáno.'); } }
-function renderAll(){ renderEditor(); renderNav(); if(tab==='preview') renderReport(); }
+function renderAll(){ renderDocs(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
 
 /* ============================================================ EVENT DELEGATION (CSP-safe) ============================================================ */
 document.addEventListener('click', e=>{
@@ -1300,10 +1388,15 @@ document.addEventListener('click', e=>{
     case 'save': save(); break;
     case 'expand': expand(el.dataset.arg, +el.dataset.pct); break;
     case 'expandProj': expandProj(el.dataset.ch, +el.dataset.i, +el.dataset.pct); break;
+    case 'newdoc': newDoc(); break;
+    case 'opendoc': switchDoc(el.dataset.id); break;
+    case 'deldoc': deleteDoc(el.dataset.id); break;
   }
 });
 document.addEventListener('change', e=>{
   const el=e.target;
+  if(el.id==='docselect'){ switchDoc(el.value); return; }
+  if(el.matches('[data-renamedoc]')){ renameDoc(el.dataset.renamedoc, el.value); return; }
   if(el.matches('[data-act="orgType"]')){ changeOrgType(el.value); return; }
   if(el.matches('[data-bind="asset"]')){ const v=el.type==='checkbox'?el.checked:el.value; setAssetProp(el.dataset.id, el.dataset.key, v); return; }
   if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); return; }
@@ -1315,6 +1408,7 @@ document.addEventListener('input', e=>{
   else if(el.matches('[data-bind="proj"]')){ updProj(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
   else if(el.matches('input[type=text][data-bind="asset"]')){ setAssetProp(el.dataset.id, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); }
+  else if(el.matches('[data-renamedoc]')){ renameDoc(el.dataset.renamedoc, el.value); }
   else if(el.matches('[data-bind="cfg"]')){ cfg[el.dataset.key]=el.value.trim?el.value.trim():el.value; persistCfg(); }
   if(el.matches('[data-bind="chap"],[data-bind="proj"],[data-bind="brand"]')) flashSaved();
 });
