@@ -34,7 +34,7 @@ export async function onRequestPost(context) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-8',
+      model: 'claude-sonnet-4-6',
       max_tokens: 4000,
       system: 'Jsi asistent, který z podkladů extrahuje data do české výroční zprávy. Vracíš POUZE JSON podle zadané struktury, nic jiného (žádný úvod, žádné ```).',
       messages: [{ role: 'user', content }],

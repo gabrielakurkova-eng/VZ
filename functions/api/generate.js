@@ -8,7 +8,7 @@ export async function onRequestPost(context) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'Neplatný JSON.' }, 400); }
 
-  const model = MODELS.has(body.model) ? body.model : 'claude-opus-4-8';
+  const model = MODELS.has(body.model) ? body.model : 'claude-sonnet-4-6';
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
