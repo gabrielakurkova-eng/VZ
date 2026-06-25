@@ -231,6 +231,24 @@
   .thermo .thhint{font-size:12px;color:var(--muted);margin-top:8px}
   .assetcard .assetsaved{font-size:10px;color:var(--brand-ink);display:flex;align-items:center;gap:3px;margin:4px 9px 8px;opacity:.85}
   .assetcard .assetsaved .ic{width:11px;height:11px}
+  /* umístění fotek (mini-Canva) */
+  .placeblock{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
+  .placehead{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px}
+  .placehead .ic{width:18px;height:18px;color:var(--brand)}
+  .photorow{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fcfdfe}
+  .photorow .protumb{width:64px;height:64px;object-fit:cover;border-radius:9px;flex:none;background:#eef2f6}
+  .photorow .profields{flex:1;min-width:0}
+  .prorow2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .prorow2 select{width:auto;min-width:120px;padding:7px 30px 7px 11px}
+  .chk{display:flex;align-items:center;gap:5px;font-size:12.5px;color:#334155;white-space:nowrap;cursor:pointer}
+  .chk input{width:auto}
+  /* fotky ve zprávě – velikosti / popisek přes fotku / hero */
+  .report .rgallery figure{position:relative;margin:0}
+  .report .rgallery figure.full{grid-column:1 / -1}
+  .report .rgallery figure.full img{height:280px}
+  .report .rgallery figure.s img{height:120px}
+  .report .rgallery figcaption.ov{position:absolute;left:0;right:0;bottom:0;margin:0;color:#fff;padding:24px 14px 10px;font-family:var(--sans);font-size:13px;line-height:1.3;border-radius:0 0 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,.66))}
+  .report .hero img{width:100%;height:220px;object-fit:cover;display:block}
 
   @media print{
     body{background:#fff}
@@ -512,7 +530,7 @@ function renderNav(){
   const pct=Math.round(done/vis.length*100);
   let h=`<div class="navspecial">
     <div class="navitem ${activeChapter==='materialy'?'active':''}" data-act="goChapter" data-arg="materialy">
-      <span class="ico">${icon('uploadCloud')}</span><span>Materiály</span>
+      <span class="ico">${icon('uploadCloud')}</span><span>Nahraj své podklady</span>
       ${data.assets.length?`<span class="badge cnt">${data.assets.length}</span>`:'<span class="dot"></span>'}
     </div>
     <div class="navitem ${activeChapter==='brand'?'active':''}" data-act="goChapter" data-arg="brand">
@@ -705,7 +723,7 @@ function renderMaterials(){
     <div class="thhint">${hint}</div>
   </div>`;
   return `<div class="panel">
-    <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Materiály</h2></div>
+    <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Nahraj své podklady</h2></div>
     <p class="lead">Nahrajte vše, co máte — starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
     ${thermo}
     <div class="dropzone" id="dropzone">
@@ -719,6 +737,39 @@ function renderMaterials(){
       <button class="btn primary" id="extractbtn" data-act="extract" ${assets.length?'':'disabled'}>${icon('sparkles')} Roztřídit s AI do kapitol</button>
       <span class="muted" style="font-size:12.5px">AI vyplní kapitoly návrhem; vše si pak zkontrolujete a upravíte.</span>
     </div>
+    ${photoPlaceHTML()}
+  </div>`;
+}
+function isImg(a){ return !!(a && ((a.kind==='photo')||(a.mime||'').startsWith('image/'))); }
+function setAssetProp(id,key,val){
+  const a=(data.assets||[]).find(x=>x.id===id); if(!a) return;
+  if(key==='cover' && val){ data.assets.forEach(x=>{ if(x!==a) x.cover=false; }); }
+  a[key]=val; persist(); flashSaved();
+  if(key!=='caption') renderEditor();
+}
+function photoPlaceHTML(){
+  const imgs=(data.assets||[]).filter(isImg);
+  if(!imgs.length) return '';
+  const chapsOpts=a=>visibleChapters().filter(c=>c.id!=='organizace').map(c=>`<option value="${c.id}" ${a.chapter===c.id?'selected':''}>${c.label}</option>`).join('');
+  return `<div class="placeblock">
+    <div class="placehead">${icon('image')} Umístění a styl fotek</div>
+    <p class="muted" style="font-size:12.5px;margin:-6px 0 12px">Vyber, do které kapitoly fotka patří, přidej popisek a uprav vzhled. Bez kapitoly se fotka ve zprávě nezobrazí.</p>
+    ${imgs.map(a=>{ const url=tmpURL[a.id]||a.url||''; return `<div class="photorow">
+      <img class="protumb" src="${url}" alt="">
+      <div class="profields">
+        <input type="text" placeholder="Popisek fotky" value="${esc(a.caption||'')}" data-bind="asset" data-id="${a.id}" data-key="caption">
+        <div class="prorow2">
+          <select data-bind="asset" data-id="${a.id}" data-key="chapter"><option value="">— kapitola —</option>${chapsOpts(a)}</select>
+          <select data-bind="asset" data-id="${a.id}" data-key="size">
+            <option value="m" ${(!a.size||a.size==='m')?'selected':''}>Střední</option>
+            <option value="s" ${a.size==='s'?'selected':''}>Malá</option>
+            <option value="full" ${a.size==='full'?'selected':''}>Na celou šířku</option>
+          </select>
+          <label class="chk"><input type="checkbox" data-bind="asset" data-id="${a.id}" data-key="overlay" ${a.overlay?'checked':''}> popisek přes fotku</label>
+          <label class="chk"><input type="checkbox" data-bind="asset" data-id="${a.id}" data-key="cover" ${a.cover?'checked':''}> na titulku</label>
+        </div>
+      </div>
+    </div>`; }).join('')}
   </div>`;
 }
 function assetCard(a){
@@ -989,8 +1040,13 @@ function ensureFont(name){
   document.head.appendChild(l);
 }
 function reportPhotos(chId){
-  const photos=(data.assets||[]).filter(a=>((a.kind==='photo')||(a.mime||'').startsWith('image/')) && a.chapter===chId);
-  const out=photos.map(a=>{ const url=tmpURL[a.id]||a.url||''; if(!url) return ''; return `<figure><img src="${url}" alt=""/>${a.caption?`<figcaption>${esc(a.caption)}</figcaption>`:''}</figure>`; }).filter(Boolean);
+  const photos=(data.assets||[]).filter(a=>isImg(a) && a.chapter===chId && !a.cover);
+  const out=photos.map(a=>{
+    const url=tmpURL[a.id]||a.url||''; if(!url) return '';
+    const cls=[a.size==='full'?'full':(a.size==='s'?'s':''), (a.overlay&&a.caption)?'overlay':''].filter(Boolean).join(' ');
+    const cap=a.caption ? (a.overlay?`<figcaption class="ov">${esc(a.caption)}</figcaption>`:`<figcaption>${esc(a.caption)}</figcaption>`) : '';
+    return `<figure class="${cls}"><img src="${url}" alt=""/>${cap}</figure>`;
+  }).filter(Boolean);
   return out.length?`<div class="rgallery">${out.join('')}</div>`:'';
 }
 
@@ -1066,6 +1122,9 @@ function renderReport(){
   const og=data.chapters.organizace||{};
   const o=orgType();
   const logoUrl = tmpURL[data.brand.logoId]||data.brand.logoUrl||'';
+  const coverPhoto=(data.assets||[]).find(a=>isImg(a)&&a.cover);
+  const heroUrl=coverPhoto?(tmpURL[coverPhoto.id]||coverPhoto.url||''):'';
+  const hero=heroUrl?`<div class="hero"><img src="${heroUrl}" alt=""></div>`:'';
   let cover=`<div class="cover">
     ${logoUrl?`<img class="cover-logo" src="${logoUrl}" alt="logo">`:''}
     <div class="kicker">Výroční zpráva</div>
@@ -1086,7 +1145,7 @@ function renderReport(){
     if(sec) body+=sec+ph;
     else if(ph) body+=`<h2>${esc(c.label)}</h2>`+ph;
   });
-  r.innerHTML=cover+`<div class="body">${body}</div>`;
+  r.innerHTML=hero+cover+`<div class="body">${body}</div>`;
 }
 function sectionOrg(og){
   const o=orgType();
@@ -1183,6 +1242,7 @@ document.addEventListener('click', e=>{
 document.addEventListener('change', e=>{
   const el=e.target;
   if(el.matches('[data-act="orgType"]')){ changeOrgType(el.value); return; }
+  if(el.matches('[data-bind="asset"]')){ const v=el.type==='checkbox'?el.checked:el.value; setAssetProp(el.dataset.id, el.dataset.key, v); return; }
   if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); return; }
   if(el.matches('[data-bind="cfg"]')){ cfg[el.dataset.key]=el.value.trim?el.value.trim():el.value; persistCfg(); }
 });
@@ -1190,6 +1250,7 @@ document.addEventListener('input', e=>{
   const el=e.target;
   if(el.matches('[data-bind="chap"]')){ setChapVal(el.dataset.ch, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="proj"]')){ updProj(el.dataset.ch, +el.dataset.i, el.dataset.key, el.value); }
+  else if(el.matches('input[type=text][data-bind="asset"]')){ setAssetProp(el.dataset.id, el.dataset.key, el.value); }
   else if(el.matches('[data-bind="brand"]')){ data.brand[el.dataset.key]=el.value; persist(); applyBrand(); }
   else if(el.matches('[data-bind="cfg"]')){ cfg[el.dataset.key]=el.value.trim?el.value.trim():el.value; persistCfg(); }
   if(el.matches('[data-bind="chap"],[data-bind="proj"],[data-bind="brand"]')) flashSaved();
