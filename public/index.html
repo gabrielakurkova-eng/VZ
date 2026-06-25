@@ -412,9 +412,12 @@
       <button class="btn" data-act="newdoc" style="margin-top:12px">+ Nová zpráva</button>
 
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
-      <h3 style="margin:0 0 10px">Data</h3>
+      <h3 style="margin:0 0 10px">Data a zálohy</h3>
+      <div class="legalnote" style="margin-bottom:14px">
+        <b>Pozor:</b> Zprávy jsou uložené jen v tomto prohlížeči a počítači, nikde v cloudu. Když se vymaže historie prohlížeče nebo přejdete na jiné zařízení, data se ztratí. Po každé delší práci si proto stáhněte zálohu (Export).
+      </div>
       <div class="row">
-        <button class="btn" data-act="export"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Export dat (JSON)</button>
+        <button class="btn primary" data-act="export"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Stáhnout zálohu (JSON)</button>
         <label class="btn" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> Import dat
           <input type="file" accept="application/json" style="display:none" id="importfile" />
         </label>
@@ -1650,7 +1653,11 @@ function importJSON(file){
   rd.onload=()=>{ try{ data=JSON.parse(rd.result); persist(); activeChapter=(visibleChapters()[0]||{}).id||'organizace'; renderAll(); toast('Data importována ✓'); }catch(e){ toast('Neplatný soubor.'); } };
   rd.readAsText(file);
 }
-function resetAll(){ if(confirm('Opravdu vymazat všechna data této zprávy?')){ data={orgType:'',chapters:{}}; persist(); activeChapter='organizace'; renderAll(); toast('Vymazáno.'); } }
+function resetAll(){
+  if(!confirm('Vymazat obsah TÉTO zprávy? Data jsou jen v tomto prohlížeči a nelze je obnovit.')) return;
+  if(confirm('Chcete si nejdřív stáhnout zálohu (JSON)? Dejte OK pro stažení zálohy, Zrušit pro vymazání bez zálohy.')) { exportJSON(); }
+  data={orgType:'',chapters:{}}; persist(); activeChapter='organizace'; renderAll(); toast('Obsah zprávy vymazán.');
+}
 function renderAll(){ renderDocs(); renderLang(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
 
 /* ============================================================ EVENT DELEGATION (CSP-safe) ============================================================ */
