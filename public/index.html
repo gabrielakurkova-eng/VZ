@@ -336,6 +336,11 @@
   .gatebox input{width:100%;text-align:center;font-size:16px;margin-bottom:12px}
   .gatebox .btn{width:100%;justify-content:center}
   .gateerr{color:#b91c1c;font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
+  #welcome{z-index:1001}
+  .gatebox.wide{max-width:440px}
+  .gatebox .btn.big{font-size:16px;padding:14px 20px;margin-top:4px}
+  .linklike{display:block;width:100%;margin-top:14px;background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .linklike:hover{color:var(--brand)}
 
   @media print{
     body{background:#fff}
@@ -370,6 +375,20 @@
     <div class="gateerr" id="gateerr"></div>
   </div>
 </div>
+<div id="welcome" class="gate" style="display:none">
+  <div class="gatebox wide">
+    <div class="gatelogo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/>
+        <polyline points="8.5 16 11 13.5 13 15 16 10.5"/><circle cx="16" cy="10.5" r="1.1" fill="#fff" stroke="none"/>
+      </svg>
+    </div>
+    <h1>Vítejte 👋</h1>
+    <p>Pojďme vytvořit vaši výroční zprávu. Vyberete typ organizace, doplníte fakta a aplikace z nich sestaví hotovou zprávu.</p>
+    <button class="btn primary big" id="welcomebtn">Založit novou výroční zprávu</button>
+    <button class="linklike" id="welcomeskip">Zatím se jen rozhlédnout</button>
+  </div>
+</div>
 <div class="app">
 
   <div class="topbar noprint">
@@ -387,7 +406,7 @@
     <div class="spacer"></div>
     <div class="docbar noprint">
       <select id="docselect" title="Přepnout zprávu"></select>
-      <button class="btn small" data-act="newdoc">+ Nová</button>
+      <button class="btn small primary" data-act="newdoc">+ Nová zpráva</button>
     </div>
     <span id="savestatus" class="savestatus noprint"></span>
     <div class="tabs">
@@ -1757,8 +1776,27 @@ async function doAuth(){
     const r=await fetch('/api/auth',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({password:pw}) });
     if(r.ok){ const j=await r.json(); if(j.ok){ localStorage.setItem('vz_access',pw); hideGate(); return; } }
     if(err) err.textContent='Chybné heslo.';
-  }catch(e){ localStorage.setItem('vz_access', pw||'local'); hideGate(); } // lokální náhled bez backendu
+  }catch(e){ localStorage.setItem('vz_access', pw||'local'); hideGate(); maybeWelcome(); return; } // lokální náhled bez backendu
+  maybeWelcome();
 }
+
+/* ============================================================ UVÍTÁNÍ (první přihlášení) ============================================================ */
+function shouldWelcome(){
+  if(localStorage.getItem('vz_welcomed')) return false;
+  const org=(data.chapters&&data.chapters.organizace)||{};
+  const started = data.orgType || docs.list.length>1 || (org.nazev||'').trim();
+  if(started){ localStorage.setItem('vz_welcomed','1'); return false; } // vracející se uživatel, nenuť ho
+  return true;
+}
+function maybeWelcome(){ if(!localStorage.getItem('vz_access')) return; if(shouldWelcome()) showWelcome(); }
+function showWelcome(){ const w=document.getElementById('welcome'); if(w) w.style.display='flex'; }
+function hideWelcome(){ const w=document.getElementById('welcome'); if(w) w.style.display='none'; }
+function startFirstReport(){
+  localStorage.setItem('vz_welcomed','1'); hideWelcome();
+  if(data.orgType){ newDoc(); } else { setTab('editor'); activeChapter='organizace'; renderAll(); }
+  setTimeout(()=>{ const sel=document.querySelector('[data-act="orgType"]'); if(sel){ sel.scrollIntoView({block:'center',behavior:'smooth'}); try{ sel.focus(); }catch(e){} } }, 80);
+}
+function skipWelcome(){ localStorage.setItem('vz_welcomed','1'); hideWelcome(); }
 
 /* ============================================================ EVENT DELEGATION (CSP-safe) ============================================================ */
 document.addEventListener('click', e=>{
@@ -1821,10 +1859,13 @@ if(data.orgType){ const vis=visibleChapters(); if(!vis.find(c=>c.id===activeChap
 applyBrand();
 renderAll();
 hydrateAssets();
-/* vstupní brána */
+/* vstupní brána + uvítání */
 document.getElementById('gatebtn').addEventListener('click', doAuth);
 document.getElementById('gatepw').addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth(); });
+document.getElementById('welcomebtn').addEventListener('click', startFirstReport);
+document.getElementById('welcomeskip').addEventListener('click', skipWelcome);
 if(!localStorage.getItem('vz_access')) showGate();
+else maybeWelcome();
 </script>
 </body>
 </html>
