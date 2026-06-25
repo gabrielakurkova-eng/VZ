@@ -23,8 +23,8 @@ pod náhodným anonymním `project` id.
 1. **Repo na GitHub** — pushněte tuto složku (`vyrocni-zprava/`) do GitHub repozitáře.
 2. **R2 bucket** — v Cloudflare dashboardu → R2 → *Create bucket* → název `vyrocni-zprava-assets`.
 3. **Pages projekt** — Cloudflare dashboard → Workers & Pages → *Create* → *Pages* → *Connect to Git* →
-   vyberte repo.
-   - **Root directory:** `vyrocni-zprava` (pokud je projekt v podsložce repa)
+   vyberte repo `VZ`.
+   - **Root directory:** *(nechat prázdné — projekt je v kořeni repa)*
    - **Build command:** *(prázdné)*
    - **Build output directory:** `public`
 4. **Binding R2** — v Pages projektu → *Settings* → *Functions* → *R2 bucket bindings* →
