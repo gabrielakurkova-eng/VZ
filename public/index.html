@@ -373,7 +373,7 @@
       </svg>
     </div>
     <h1>Generátor výročních zpráv</h1>
-    <p>Pro vstup zadejte přístupové heslo.</p>
+    <p>Pro vstup zadej přístupové heslo.</p>
     <input type="password" id="gatepw" placeholder="Heslo" autocomplete="off" />
     <button class="btn primary" id="gatebtn">Vstoupit</button>
     <div class="gateerr" id="gateerr"></div>
@@ -388,7 +388,7 @@
       </svg>
     </div>
     <h1>Vítejte 👋</h1>
-    <p>Pojďme vytvořit vaši výroční zprávu. Vyberete typ organizace, doplníte fakta a aplikace z nich sestaví hotovou zprávu.</p>
+    <p>Pojďme vytvořit tvoji výroční zprávu. Vybereš typ organizace, doplníš fakta a aplikace z nich sestaví hotovou zprávu.</p>
     <button class="btn primary big" id="welcomebtn">Založit novou výroční zprávu</button>
     <button class="linklike" id="welcomeskip">Zatím se jen rozhlédnout</button>
   </div>
@@ -431,7 +431,7 @@
     <div class="preview-toolbar noprint">
       <button class="btn primary" data-act="print"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg> Tisk / Uložit do PDF</button>
       <button class="btn" data-act="tab" data-arg="editor"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Zpět do editoru</button>
-      <span class="muted" style="font-size:13px">Tip: v dialogu tisku zvolte „Uložit jako PDF". Stejné zobrazení můžete použít i jako webovou stránku.</span>
+      <span class="muted" style="font-size:13px">Tip: v dialogu tisku zvol „Uložit jako PDF". Stejné zobrazení můžeš použít i jako webovou stránku.</span>
     </div>
     <div class="report" id="report"></div>
     <div class="preview-toolbar noprint" style="margin-top:16px;justify-content:center">
@@ -459,7 +459,7 @@
       </div>
 
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
-      <h3 style="margin:0 0 6px">Vaše zprávy</h3>
+      <h3 style="margin:0 0 6px">Tvoje zprávy</h3>
       <p class="keyhint" style="margin:0 0 12px">Můžeš mít rozpracovaných víc zpráv (např. pro různé organizace) a kdykoli se k nim vrátit. Přejmenuj je přímo v políčku.</p>
       <div id="docsmgr"></div>
       <button class="btn" data-act="newdoc" style="margin-top:12px">+ Nová zpráva</button>
@@ -467,7 +467,7 @@
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
       <h3 style="margin:0 0 10px">Data a zálohy</h3>
       <div class="legalnote" style="margin-bottom:14px">
-        <b>Pozor:</b> Zprávy jsou uložené jen v tomto prohlížeči a počítači, nikde v cloudu. Když se vymaže historie prohlížeče nebo přejdete na jiné zařízení, data se ztratí. Po každé delší práci si proto stáhněte zálohu (Export).
+        <b>Pozor:</b> Zprávy jsou uložené jen v tomto prohlížeči a počítači, nikde v cloudu. Když se vymaže historie prohlížeče nebo přejdeš na jiné zařízení, data se ztratí. Po každé delší práci si proto stáhni zálohu (Export).
       </div>
       <div class="row">
         <button class="btn primary" data-act="export"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Stáhnout zálohu (JSON)</button>
@@ -484,11 +484,11 @@
     <div class="ft-grid">
       <div>
         <div class="ft-h">O aplikaci</div>
-        <p>Tvorba výroční zprávy krok za krokem: výběr typu organizace, nahrání podkladů, roztřídění do kapitol pomocí AI, generování textů, fotky a loga, vzhled podle vašeho loga a export do PDF. Pro NNO i firmy, v souladu s platnou legislativou ČR.</p>
+        <p>Tvorba výroční zprávy krok za krokem: výběr typu organizace, nahrání podkladů, roztřídění do kapitol pomocí AI, generování textů, fotky a loga, vzhled podle tvého loga a export do PDF. Pro NNO i firmy, v souladu s platnou legislativou ČR.</p>
       </div>
       <div>
         <div class="ft-h">Ochrana dat (GDPR)</div>
-        <p>Vaše texty i nahrané soubory zůstávají uložené lokálně ve vašem prohlížeči, neukládáme je na vlastní servery. Pro generování textů se obsah odesílá ke zpracování umělé inteligenci (Anthropic Claude, případně Google Gemini). Nenahrávejte citlivé osobní údaje, které do zprávy nepatří.</p>
+        <p>Tvoje texty i nahrané soubory zůstávají uložené lokálně v tvém prohlížeči, neukládáme je na vlastní servery. Pro generování textů se obsah odesílá ke zpracování umělé inteligenci (Anthropic Claude, případně Google Gemini). Nenahrávej citlivé osobní údaje, které do zprávy nepatří.</p>
       </div>
       <div>
         <div class="ft-h">Kontakt</div>
@@ -535,7 +535,7 @@ const ORG_TYPES = [
     note:'Družstva reportují činnost a hospodaření dle stanov; sociální družstva často přidávají i reporting společenského dopadu.',
     required:['organizace','organy','cinnost','finance'], hidden:[] },
   { id:'jine', label:'Jiný typ organizace', cat:'Ostatní',
-    note:'Univerzální šablona, zobrazí se všechny kapitoly jako volitelné. Povinné sekce si určíte sami dle vlastních pravidel.',
+    note:'Univerzální šablona, zobrazí se všechny kapitoly jako volitelné. Povinné sekce si určíš podle vlastních pravidel.',
     required:['organizace'], hidden:[] },
 ];
 
@@ -570,7 +570,7 @@ const CHAPTERS = [
     ] },
 
   { id:'cinnost', label:'Činnost a projekty', ico:'layers', defaultStatus:'required',
-    lead:'Klíčové aktivity a projekty roku. Pro každý zadejte fakta v odrážkách, AI z nich vytvoří souvislý text.',
+    lead:'Klíčové aktivity a projekty roku. U každého zadej fakta v odrážkách, AI z nich vytvoří souvislý text.',
     projects:true },
 
   { id:'lide', label:'Zaměstnanci a dobrovolníci', ico:'userCheck', defaultStatus:'optional',
@@ -582,7 +582,7 @@ const CHAPTERS = [
     ] },
 
   { id:'finance', label:'Hospodaření', ico:'wallet', defaultStatus:'required',
-    lead:'Přehled příjmů, výdajů a výsledku hospodaření. Částky uvádějte v Kč.',
+    lead:'Přehled příjmů, výdajů a výsledku hospodaření. Částky uváděj v Kč.',
     fields:[
       {key:'prijmy_dotace', label:'Příjmy: dotace a granty', type:'number', placeholder:'0'},
       {key:'prijmy_dary', label:'Příjmy: dary', type:'number', placeholder:'0'},
@@ -781,7 +781,7 @@ function setTab(t){
 /* ============================================================ NAV ============================================================ */
 function renderNav(){
   const nav=document.getElementById('nav');
-  if(!data.orgType){ nav.innerHTML='<div class="navempty">Nejprve vyberte typ organizace.</div>'; return; }
+  if(!data.orgType){ nav.innerHTML='<div class="navempty">Nejdřív vyber typ organizace.</div>'; return; }
   const vis=visibleChapters();
   const done=vis.filter(c=>isChapterFilled(c)).length;
   const pct=Math.round(done/vis.length*100);
@@ -842,7 +842,7 @@ function renderEditor(){
 const SECTOR_ORDER=['Nezisková organizace','Veřejný sektor','Podnikatelský sektor','Ostatní'];
 function renderOrgPicker(){
   const o=orgType();
-  let opts='<option value="">vyberte typ organizace</option>';
+  let opts='<option value="">vyber typ organizace</option>';
   SECTOR_ORDER.forEach(sec=>{
     const inSec=ORG_TYPES.filter(t=>t.cat===sec);
     if(!inSec.length) return;
@@ -850,7 +850,7 @@ function renderOrgPicker(){
   });
   return `<div class="panel">
     <h2>Typ organizace</h2>
-    <p class="lead">Vyberte podle sektoru a právní formy, zobrazí se odpovídající kapitoly a zákonné povinnosti.</p>
+    <p class="lead">Vyber podle sektoru a právní formy, zobrazí se odpovídající kapitoly a zákonné povinnosti.</p>
     <div class="field" style="max-width:520px;margin-bottom:0">
       <select data-act="orgType">${opts}</select>
     </div>
@@ -975,7 +975,7 @@ async function financeAI(){
     for(const a of atts){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, dataB64:await blobToB64(b) }); }
     if(!files.length) throw new Error('Soubory se nepodařilo načíst.');
     const res=await fetch('/api/finance',{method:'POST',headers:apiHeaders(),body:JSON.stringify({files})});
-    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
     const r=(await res.json()).result||{}; const f=r.fields||{};
     ['prijmy_dotace','prijmy_dary','prijmy_vlastni','prijmy_ostatni','vydaje_provoz','vydaje_mzdy','vydaje_projekty','vydaje_ostatni','majetek'].forEach(k=>{ if(f[k]!=null && String(f[k]).trim()) setChapVal('finance',k,String(f[k])); });
@@ -997,14 +997,14 @@ async function aresLoad(){
   let ico=String(org.ico||'').replace(/\D+/g,'');
   const msg=document.getElementById('aresmsg');
   const setMsg=(t,err)=>{ if(msg){ msg.textContent=t; msg.style.color=err?'#b91c1c':'var(--muted)'; } };
-  if(!ico || ico.length>8){ setMsg('Zadejte do pole IČO platné číslo (max 8 číslic) a zkuste to znovu.',true); return; }
+  if(!ico || ico.length>8){ setMsg('Zadej do pole IČO platné číslo (max 8 číslic) a zkus to znovu.',true); return; }
   ico=ico.padStart(8,'0');
   const btn=document.querySelector('[data-act="aresLoad"]');
   const orig=btn?btn.innerHTML:''; if(btn){ btn.disabled=true; btn.innerHTML=icon('spinner','spin')+' Načítám…'; }
   setMsg('Načítám z ARES…');
   try{
     const res=await fetch('/api/ares?ico='+ico, { headers: apiHeaders() });
-    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
     if(res.status===404){ throw new Error('Subjekt s tímto IČO nebyl v ARES nalezen.'); }
     if(!res.ok){ let m='ARES '+res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
     const d=await res.json();
@@ -1091,8 +1091,8 @@ function narrativeHTML(c){
   const notes=esc(chapVal(c.id,n.notesKey));
   const out=esc(chapVal(c.id,n.outputKey));
   const isUvod=c.id==='uvod';
-  const label = isUvod?'Doplňující poznámky (nepovinné)' : (c.id==='finance'?'Komentář k hospodaření':'Vaše poznámky (odrážky / fakta)');
-  const headHint = isUvod?'· úvodní slovo AI sestaví z ostatních kapitol; poznámky jsou nepovinné' : '· zadejte fakta, AI z nich vytvoří text';
+  const label = isUvod?'Doplňující poznámky (nepovinné)' : (c.id==='finance'?'Komentář k hospodaření':'Tvoje poznámky (odrážky / fakta)');
+  const headHint = isUvod?'· úvodní slovo AI sestaví z ostatních kapitol; poznámky jsou nepovinné' : '· zadej fakta, AI z nich vytvoří text';
   const placeholder = isUvod?'Volitelně: na co letos zvlášť upozornit, komu jmenovitě poděkovat…' : (CH_NOTE_PH[c.id]||'• co se dělo&#10;• klíčová čísla a výsledky&#10;• komu poděkovat / co zdůraznit');
   const btnText = isUvod?'Vygenerovat úvodní slovo ze zprávy' : 'Vygenerovat text';
   return `<div class="notes-block">
@@ -1101,7 +1101,7 @@ function narrativeHTML(c){
       placeholder="${placeholder}">${notes}</textarea>
     <div class="row" style="margin-top:10px">
       <button class="btn primary small" id="gen-${c.id}" data-act="generate" data-arg="${c.id}">${icon('sparkles')} ${btnText}</button>
-      <span class="muted" style="font-size:12px">Vygenerovaný text si můžete dále upravit.</span>
+      <span class="muted" style="font-size:12px">Vygenerovaný text si můžeš dále upravit.</span>
     </div>
     <div class="ai-out" ${out?'':'style="display:none"'} id="out-${c.id}">
       <div class="aohead">Návrh textu</div>
@@ -1196,8 +1196,8 @@ function renderMaterials(){
   const photos=assets.filter(a=>a.kind==='photo'||(a.mime||'').startsWith('image/')).length;
   const score=Math.max(n?8:0, Math.min(100, n*18 + (hasPdf?25:0) + Math.min(photos,3)*5));
   const level = n===0 ? 'žádné' : (score>=70?'Bohaté':score>=40?'Dobrý základ':'Základní');
-  const hint = n===0 ? 'Nahrajte staré VZ a fotky, čím víc podkladů, tím konkrétnější výsledek AI.'
-    : (score>=70 ? 'Skvělé, AI má z čeho čerpat.' : (hasPdf?'Dobré. Přidejte i fotky k projektům.':'Tip: přidejte starou výroční zprávu (PDF) pro výrazně lepší výsledek.'));
+  const hint = n===0 ? 'Nahraj staré VZ a fotky, čím víc podkladů, tím konkrétnější výsledek AI.'
+    : (score>=70 ? 'Skvělé, AI má z čeho čerpat.' : (hasPdf?'Dobré. Přidej i fotky k projektům.':'Tip: přidej starou výroční zprávu (PDF) pro výrazně lepší výsledek.'));
   const thermo = `<div class="thermo">
     <div class="thlabel"><span>Bohatost podkladů</span><span>${level}</span></div>
     <div class="thbar"><div class="thfill" style="width:${score}%"></div></div>
@@ -1205,18 +1205,18 @@ function renderMaterials(){
   </div>`;
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon('uploadCloud')}</span>Nahraj své podklady</h2></div>
-    <p class="lead">Nahrajte vše, co máte: starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
+    <p class="lead">Nahraj vše, co máš: starší výroční zprávy (PDF), dokumenty a projektové fotky. AI z nich vytěží údaje a roztřídí je do kapitol.</p>
     ${thermo}
     <div class="dropzone" id="dropzone">
       ${icon('uploadCloud')}
-      <div class="dztext"><strong>Přetáhněte soubory sem</strong> nebo klikněte pro výběr</div>
+      <div class="dztext"><strong>Přetáhni soubory sem</strong> nebo klikni pro výběr</div>
       <div class="dzhint">PDF, obrázky (JPG/PNG), dokumenty · max 25 MB / soubor</div>
       <input type="file" id="fileinput" multiple style="display:none" accept=".pdf,image/*,.doc,.docx,.txt,.csv,.xlsx" />
     </div>
     ${list}
     <div class="row" style="margin-top:18px">
       <button class="btn primary" id="extractbtn" data-act="extract" ${assets.length?'':'disabled'}>${icon('sparkles')} Roztřídit s AI do kapitol</button>
-      <span class="muted" style="font-size:12.5px">AI vyplní kapitoly návrhem; vše si pak zkontrolujete a upravíte.</span>
+      <span class="muted" style="font-size:12.5px">AI vyplní kapitoly návrhem; vše si pak zkontroluješ a upravíš.</span>
     </div>
     ${photoPlaceHTML()}
   </div>`;
@@ -1240,7 +1240,7 @@ function photoPlaceHTML(){
       <div class="profields">
         <input type="text" placeholder="Popisek fotky" value="${esc(a.caption||'')}" data-bind="asset" data-id="${a.id}" data-key="caption">
         <div class="prorow2">
-          <select data-bind="asset" data-id="${a.id}" data-key="chapter"><option value="">vyberte kapitolu</option>${chapsOpts(a)}</select>
+          <select data-bind="asset" data-id="${a.id}" data-key="chapter"><option value="">vyber kapitolu</option>${chapsOpts(a)}</select>
           <select data-bind="asset" data-id="${a.id}" data-key="size">
             <option value="m" ${(!a.size||a.size==='m')?'selected':''}>Střední</option>
             <option value="s" ${a.size==='s'?'selected':''}>Malá</option>
@@ -1425,7 +1425,7 @@ async function handleToneDoc(file){
   try{
     const dataB64=await blobToB64(file);
     const res=await fetch('/api/tone',{method:'POST',headers:apiHeaders(),body:JSON.stringify({file:{mime:file.type||'application/octet-stream',dataB64}})});
-    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
     const j=await res.json();
     const cur=(data.brand.manualNotes||'').trim();
@@ -1436,7 +1436,7 @@ async function handleToneDoc(file){
 
 async function extract(){
   const assets=(data.assets||[]).filter(a=>!a.appendix);
-  if(!assets.length){ toast('Nahrajte nejdřív materiály.'); return; }
+  if(!assets.length){ toast('Nahraj nejdřív materiály.'); return; }
   const btn=document.getElementById('extractbtn'); setBusy(btn,true);
   try{
     const files=[];
@@ -1444,7 +1444,7 @@ async function extract(){
     if(!files.length){ throw new Error('Soubory se nepodařilo načíst z prohlížeče.'); }
     const res=await fetch('/api/extract', { method:'POST', headers:apiHeaders(),
       body:JSON.stringify({ orgType:data.orgType, files }) });
-    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{ const j=await res.json(); if(j.error) m=j.error; }catch(e){} throw new Error(m); }
     const j=await res.json();
     applyExtraction(j.result);
@@ -1593,11 +1593,11 @@ async function generate(chId){
     const digest=assembleReportDigest();
     const extra=(chapVal('uvod','poznamky')||'').trim();
     const hasContent = digest.split('\n').length>1; // víc než jen řádek s názvem organizace
-    if(!hasContent && !extra){ toast('Nejdřív vyplňte ostatní kapitoly, úvodní slovo se generuje z nich.'); return; }
+    if(!hasContent && !extra){ toast('Nejdřív vyplň ostatní kapitoly, úvodní slovo se generuje z nich.'); return; }
     usr=`Napiš úvodní slovo (ředitele/předsedy) do výroční zprávy, cca 150–250 slov. Shrň uplynulý rok, vyzdvihni nejdůležitější výsledky a poděkuj. Vyjdi VÝHRADNĚ z následujících sestavených podkladů celé zprávy, neopakuj je doslova, ale shrň je do plynulého osobního úvodu.\n\nKONTEXT:\n${orgContext()}\n\nSESTAVENÉ PODKLADY ZPRÁVY:\n${digest}${extra?('\n\nDOPLŇUJÍCÍ POZNÁMKY OD UŽIVATELE:\n'+extra):''}`;
   } else {
     const notes=chapVal(chId,n.notesKey);
-    if(!notes.trim()){ toast('Nejprve zadejte poznámky.'); return; }
+    if(!notes.trim()){ toast('Nejdřív zadej poznámky.'); return; }
     usr=`${n.hint}\n\nKONTEXT ORGANIZACE:\n${orgContext()}\n\nPODKLADY (odrážky od uživatele) pro kapitolu „${c.label}":\n${notes}`;
   }
   setBusy(btn,true);
@@ -1621,7 +1621,7 @@ PRAVIDLA:
 
 async function generateProj(chId,i){
   const p=ensureItems(chId)[i];
-  if(!(p.poznamky||'').trim()){ toast('Nejprve zadejte poznámky k projektu.'); return; }
+  if(!(p.poznamky||'').trim()){ toast('Nejdřív zadej poznámky k projektu.'); return; }
   const btn=document.getElementById(`genproj-${chId}-${i}`); setBusy(btn,true);
   const sys=`Jsi editor výročních zpráv. Z dodaných faktů napiš věcný popis projektu (1–2 odstavce) v první osobě množného čísla.
 - Vycházej JEN z dodaných podkladů; nevymýšlej si čísla, jména, výsledky ani události, které tam nejsou.
@@ -1644,7 +1644,7 @@ async function callClaude(system,user){
     headers:apiHeaders(),
     body:JSON.stringify({ system, user, model:cfg.model||'claude-sonnet-4-6' })
   });
-  if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
+  if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
   if(!res.ok){
     let msg=res.status+' '+res.statusText;
     try{ const j=await res.json(); if(j.error) msg=j.error; }catch(e){}
@@ -1664,7 +1664,7 @@ function renderReport(){
     tb.forEach(t=>t.style.display='none'); // není co tisknout
     r.innerHTML=`<div class="report-empty">
       <div class="re-ico">${icon('fileText')}</div>
-      <p>Zatím není co zobrazit. Nejdřív vyberte typ organizace a vyplňte údaje v editoru.</p>
+      <p>Zatím není co zobrazit. Nejdřív vyber typ organizace a vyplň údaje v editoru.</p>
       <button class="btn primary" data-act="tab" data-arg="editor">Přejít do editoru</button>
     </div>`;
     return;
@@ -1777,7 +1777,7 @@ function importJSON(file){
 }
 function resetAll(){
   if(!confirm('Vymazat obsah TÉTO zprávy? Data jsou jen v tomto prohlížeči a nelze je obnovit.')) return;
-  if(confirm('Chcete si nejdřív stáhnout zálohu (JSON)? Dejte OK pro stažení zálohy, Zrušit pro vymazání bez zálohy.')) { exportJSON(); }
+  if(confirm('Chceš si nejdřív stáhnout zálohu (JSON)? Dej OK pro stažení zálohy, Zrušit pro vymazání bez zálohy.')) { exportJSON(); }
   data={orgType:'',chapters:{}}; persist(); activeChapter='organizace'; renderAll(); toast('Obsah zprávy vymazán.');
 }
 function renderAll(){ renderDocs(); renderLang(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
