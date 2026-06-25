@@ -2,11 +2,7 @@ name = "vyrocni-zprava"
 compatibility_date = "2026-01-01"
 pages_build_output_dir = "public"
 
-# Úložiště nahraných souborů (staré VZ, fotky, logo, grafický manuál)
-[[r2_buckets]]
-binding = "ASSETS_BUCKET"
-bucket_name = "vyrocni-zprava-assets"
-
-# Tajný klíč nastavíte mimo tento soubor:
-#   wrangler pages secret put ANTHROPIC_API_KEY
-# (lokálně: do souboru .dev.vars řádek  ANTHROPIC_API_KEY=sk-ant-...)
+# Žádné placené služby. Potřeba je jen secret s Claude API klíčem:
+#   Cloudflare Pages → Settings → Variables and Secrets → Secret: ANTHROPIC_API_KEY
+# Lokálně: do souboru .dev.vars řádek  ANTHROPIC_API_KEY=sk-ant-...
+# Nahrané soubory (fotky, logo, staré VZ) se ukládají v prohlížeči (IndexedDB), ne na server.

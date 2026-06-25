@@ -1,29 +1,25 @@
-// POST /api/extract  → přečte nahrané soubory z R2 a AI z nich vytěží data do kapitol
+// POST /api/extract  → AI vytěží data z podkladů (soubory přijdou base64 z prohlížeče; žádné serverové úložiště)
 export async function onRequestPost(context) {
   const { request, env } = context;
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'Na serveru chybí ANTHROPIC_API_KEY.' }, 500);
-  if (!env.ASSETS_BUCKET) return json({ error: 'R2 bucket není nakonfigurován.' }, 500);
 
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'Neplatný JSON.' }, 400); }
-  const project = (body.project || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
-  const assets = Array.isArray(body.assets) ? body.assets.slice(0, 20) : [];
-  if (!project || !assets.length) return json({ error: 'Chybí materiály k roztřídění.' }, 400);
+  const files = Array.isArray(body.files) ? body.files.slice(0, 20) : [];
+  if (!files.length) return json({ error: 'Chybí materiály k roztřídění.' }, 400);
 
   const content = [{ type: 'text', text: 'Níže jsou podklady organizace (starší výroční zprávy, dokumenty, fotky). Každý soubor je uvozen identifikátorem.' }];
 
-  for (const a of assets) {
-    const obj = await env.ASSETS_BUCKET.get(`${project}/${a.id}`);
-    if (!obj) continue;
-    const buf = await obj.arrayBuffer();
-    const mime = (obj.httpMetadata && obj.httpMetadata.contentType) || a.mime || 'application/octet-stream';
-    content.push({ type: 'text', text: `\n--- SOUBOR id=${a.id} název="${(a.name || '').replace(/"/g, '')}" typ=${a.kind || ''} ---` });
+  for (const f of files) {
+    if (!f.dataB64) continue;
+    const mime = f.mime || 'application/octet-stream';
+    content.push({ type: 'text', text: `\n--- SOUBOR id=${f.id} název="${(f.name || '').replace(/"/g, '')}" typ=${f.kind || ''} ---` });
     if (mime.startsWith('image/')) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: mime, data: toBase64(buf) } });
+      content.push({ type: 'image', source: { type: 'base64', media_type: mime, data: f.dataB64 } });
     } else if (mime === 'application/pdf') {
-      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: toBase64(buf) } });
+      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: f.dataB64 } });
     } else {
-      try { content.push({ type: 'text', text: new TextDecoder().decode(buf).slice(0, 20000) }); } catch (e) {}
+      try { content.push({ type: 'text', text: atob(f.dataB64).slice(0, 20000) }); } catch (e) {}
     }
   }
 
@@ -71,11 +67,6 @@ function parseJSON(t) {
   const a = t.indexOf('{'), b = t.lastIndexOf('}');
   if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch (e) {} }
   return null;
-}
-function toBase64(buf) {
-  let bin = ''; const bytes = new Uint8Array(buf); const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  return btoa(bin);
 }
 function json(o, s = 200) {
   return new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json' } });

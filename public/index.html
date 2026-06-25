@@ -739,53 +739,57 @@ function afterRender(){
   if(li) li.addEventListener('change', e=>{ const f=e.target.files[0]; if(f) handleLogo(f); });
 }
 
-async function uploadAsset(file, kind){
-  const q=`?project=${encodeURIComponent(data.project)}&kind=${kind}&name=${encodeURIComponent(file.name)}`;
-  const res=await fetch('/api/upload'+q, { method:'POST', headers:{'content-type':file.type||'application/octet-stream'}, body:file });
-  if(!res.ok){ let m=res.status; try{ const j=await res.json(); if(j.error) m=j.error; }catch(e){} throw new Error(m); }
-  return res.json();
+/* Soubory se ukládají lokálně v prohlížeči (IndexedDB) — žádné placené úložiště. */
+const IDB=(()=>{ let p; function db(){ return p||(p=new Promise((res,rej)=>{ const r=indexedDB.open('vz_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('f'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); })); }
+  return {
+    async set(k,v){ const d=await db(); return new Promise((res,rej)=>{ const t=d.transaction('f','readwrite'); t.objectStore('f').put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); },
+    async get(k){ const d=await db(); return new Promise((res,rej)=>{ const t=d.transaction('f','readonly'); const q=t.objectStore('f').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); },
+    async del(k){ const d=await db(); return new Promise((res)=>{ const t=d.transaction('f','readwrite'); t.objectStore('f').delete(k); t.oncomplete=()=>res(); t.onerror=()=>res(); }); }
+  };
+})();
+function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]||''); r.onerror=()=>rej(r.error); r.readAsDataURL(blob); }); }
+function uuid(){ return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():('id'+Date.now()+Math.round(Math.random()*1e6)); }
+
+async function hydrateAssets(){
+  let changed=false;
+  for(const a of (data.assets||[])){ if(!tmpURL[a.id]){ try{ const b=await IDB.get(a.id); if(b){ tmpURL[a.id]=URL.createObjectURL(b); changed=true; } }catch(e){} } }
+  const lid=data.brand&&data.brand.logoId;
+  if(lid && !tmpURL[lid]){ try{ const b=await IDB.get(lid); if(b){ tmpURL[lid]=URL.createObjectURL(b); changed=true; } }catch(e){} }
+  if(changed){ renderEditor(); if(tab==='preview') renderReport(); }
 }
 
 async function handleFiles(files){
   for(const f of Array.from(files)){
-    const kind = (f.type||'').startsWith('image/') ? 'photo' : 'doc';
-    const tmpid='tmp-'+Math.random().toString(36).slice(2);
-    tmpURL[tmpid]=URL.createObjectURL(f);
-    const asset={ id:tmpid, name:f.name, mime:f.type||'application/octet-stream', kind, uploading:true };
-    data.assets.push(asset); persist(); renderEditor(); renderNav();
-    try{
-      const up=await uploadAsset(f, kind);
-      tmpURL[up.id]=tmpURL[tmpid]; delete tmpURL[tmpid];
-      Object.assign(asset, { id:up.id, url:up.url, uploading:false });
-    }catch(e){
-      asset.uploading=false; asset.error=true;
-      toast('Nahrání selhalo (běží backend?): '+e.message);
-    }
+    const kind=(f.type||'').startsWith('image/')?'photo':'doc';
+    const id=uuid();
+    try{ await IDB.set(id, f); }catch(e){ toast('Soubor se nepodařilo uložit: '+e.message); continue; }
+    tmpURL[id]=URL.createObjectURL(f);
+    data.assets.push({ id, name:f.name, mime:f.type||'application/octet-stream', kind });
     persist(); renderEditor(); renderNav();
   }
 }
 
 async function handleLogo(file){
-  const objurl=URL.createObjectURL(file);
-  tmpURL['tmp-logo']=objurl; data.brand.logoId='tmp-logo'; data.brand.logoUrl=''; persist(); applyBrand(); renderEditor();
-  try{
-    const up=await uploadAsset(file, 'logo');
-    tmpURL[up.id]=objurl; data.brand.logoId=up.id; data.brand.logoUrl=up.url;
-  }catch(e){ toast('Nahrání loga selhalo: '+e.message); }
+  const id='logo-'+uuid();
+  try{ await IDB.set(id, file); }catch(e){ toast('Logo se nepodařilo uložit: '+e.message); return; }
+  if(data.brand.logoId) IDB.del(data.brand.logoId);
+  tmpURL[id]=URL.createObjectURL(file); data.brand.logoId=id; data.brand.logoUrl='';
   persist(); applyBrand(); renderEditor(); renderNav();
 }
 
-function removeAsset(id){ data.assets=(data.assets||[]).filter(a=>a.id!==id); persist(); renderEditor(); renderNav(); }
-function removeLogo(){ data.brand.logoId=''; data.brand.logoUrl=''; persist(); applyBrand(); renderEditor(); renderNav(); }
+function removeAsset(id){ IDB.del(id); data.assets=(data.assets||[]).filter(a=>a.id!==id); persist(); renderEditor(); renderNav(); }
+function removeLogo(){ if(data.brand.logoId) IDB.del(data.brand.logoId); data.brand.logoId=''; data.brand.logoUrl=''; persist(); applyBrand(); renderEditor(); renderNav(); }
 
 async function extract(){
-  const ready=(data.assets||[]).filter(a=>a.url);
-  if(!ready.length){ toast('Materiály ještě nejsou nahrané na server (běží backend?).'); return; }
+  const assets=(data.assets||[]);
+  if(!assets.length){ toast('Nahrajte nejdřív materiály.'); return; }
   const btn=document.getElementById('extractbtn'); setBusy(btn,true);
   try{
+    const files=[];
+    for(const a of assets){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, kind:a.kind, dataB64:await blobToB64(b) }); }
+    if(!files.length){ throw new Error('Soubory se nepodařilo načíst z prohlížeče.'); }
     const res=await fetch('/api/extract', { method:'POST', headers:{'content-type':'application/json'},
-      body:JSON.stringify({ project:data.project, orgType:data.orgType,
-        assets:ready.map(a=>({ id:a.id, name:a.name, mime:a.mime, kind:a.kind })) }) });
+      body:JSON.stringify({ orgType:data.orgType, files }) });
     if(!res.ok){ let m=res.status; try{ const j=await res.json(); if(j.error) m=j.error; }catch(e){} throw new Error(m); }
     const j=await res.json();
     applyExtraction(j.result);
@@ -1028,6 +1032,7 @@ document.getElementById('model').value=cfg.model;
 if(data.orgType){ const vis=visibleChapters(); if(!vis.find(c=>c.id===activeChapter)) activeChapter=vis[0]?.id||'organizace'; }
 applyBrand();
 renderAll();
+hydrateAssets();
 </script>
 </body>
 </html>
