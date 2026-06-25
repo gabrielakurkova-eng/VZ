@@ -862,13 +862,16 @@ function renderChapter(c){
   }
   if(c.projects) inner += projectsHTML(c);
   if(c.narrative) inner += narrativeHTML(c);
+  const media = chapterMediaHTML(c);
+  const mediaTop = (c.id==='finance'); // u hospodaření patří výkazy/přílohy na začátek
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon(c.ico)}</span>${c.label}</h2>${pill}</div>
     <p class="lead">${c.lead}</p>
     ${CH_TIP[c.id]?`<div class="tip">${icon('sparkles')} ${CH_TIP[c.id]}</div>`:''}
     ${c.people?peopleHTML(c):''}
+    ${mediaTop?media:''}
     ${inner}
-    ${chapterMediaHTML(c)}
+    ${mediaTop?'':media}
     ${saveBar()}
   </div>`;
 }
