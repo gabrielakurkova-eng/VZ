@@ -325,6 +325,18 @@
   .report .aptitle{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 8px}
   .report .apimg{width:100%;border:1px solid #eef2f6;border-radius:8px;display:block}
 
+  /* vstupní brána */
+  .gate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:radial-gradient(1000px 500px at 110% -10%, #d8f5ee 0%, rgba(216,245,238,0) 55%), radial-gradient(800px 450px at -10% 0%, #e7f0fb 0%, rgba(231,240,251,0) 50%), #f4f7fa}
+  .gatebox{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);padding:34px 30px;max-width:380px;width:100%;text-align:center}
+  .gatelogo{width:52px;height:52px;border-radius:14px;margin:0 auto 16px;background:linear-gradient(135deg,var(--brand2),var(--brand));box-shadow:0 8px 20px rgba(13,148,136,.38);display:grid;place-items:center}
+  .gatelogo svg{width:28px;height:28px}
+  .gatebox h1{font-family:var(--disp);font-size:21px;margin:0 0 6px}
+  .gatebox p{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .gatebox input{width:100%;text-align:center;font-size:16px;margin-bottom:12px}
+  .gatebox .btn{width:100%;justify-content:center}
+  .gateerr{color:#b91c1c;font-size:13px;font-weight:600;margin-top:12px;min-height:18px}
+
   @media print{
     body{background:#fff}
     .app{max-width:none;padding:0}
@@ -343,6 +355,21 @@
 </style>
 </head>
 <body>
+<div id="gate" class="gate" style="display:none">
+  <div class="gatebox">
+    <div class="gatelogo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/>
+        <polyline points="8.5 16 11 13.5 13 15 16 10.5"/><circle cx="16" cy="10.5" r="1.1" fill="#fff" stroke="none"/>
+      </svg>
+    </div>
+    <h1>Generátor výročních zpráv</h1>
+    <p>Pro vstup zadejte přístupové heslo.</p>
+    <input type="password" id="gatepw" placeholder="Heslo" autocomplete="off" />
+    <button class="btn primary" id="gatebtn">Vstoupit</button>
+    <div class="gateerr" id="gateerr"></div>
+  </div>
+</div>
 <div class="app">
 
   <div class="topbar noprint">
@@ -920,7 +947,8 @@ async function financeAI(){
     const files=[];
     for(const a of atts){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, dataB64:await blobToB64(b) }); }
     if(!files.length) throw new Error('Soubory se nepodařilo načíst.');
-    const res=await fetch('/api/finance',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({files})});
+    const res=await fetch('/api/finance',{method:'POST',headers:apiHeaders(),body:JSON.stringify({files})});
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
     const r=(await res.json()).result||{}; const f=r.fields||{};
     ['prijmy_dotace','prijmy_dary','prijmy_vlastni','prijmy_ostatni','vydaje_provoz','vydaje_mzdy','vydaje_projekty','vydaje_ostatni','majetek'].forEach(k=>{ if(f[k]!=null && String(f[k]).trim()) setChapVal('finance',k,String(f[k])); });
@@ -1322,7 +1350,8 @@ async function handleToneDoc(file){
   toast('Analyzuji tón…');
   try{
     const dataB64=await blobToB64(file);
-    const res=await fetch('/api/tone',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({file:{mime:file.type||'application/octet-stream',dataB64}})});
+    const res=await fetch('/api/tone',{method:'POST',headers:apiHeaders(),body:JSON.stringify({file:{mime:file.type||'application/octet-stream',dataB64}})});
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
     const j=await res.json();
     const cur=(data.brand.manualNotes||'').trim();
@@ -1339,8 +1368,9 @@ async function extract(){
     const files=[];
     for(const a of assets){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, kind:a.kind, dataB64:await blobToB64(b) }); }
     if(!files.length){ throw new Error('Soubory se nepodařilo načíst z prohlížeče.'); }
-    const res=await fetch('/api/extract', { method:'POST', headers:{'content-type':'application/json'},
+    const res=await fetch('/api/extract', { method:'POST', headers:apiHeaders(),
       body:JSON.stringify({ orgType:data.orgType, files }) });
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
     if(!res.ok){ let m=res.status; try{ const j=await res.json(); if(j.error) m=j.error; }catch(e){} throw new Error(m); }
     const j=await res.json();
     applyExtraction(j.result);
@@ -1535,9 +1565,10 @@ async function generateProj(chId,i){
 async function callClaude(system,user){
   const res=await fetch('/api/generate',{
     method:'POST',
-    headers:{'content-type':'application/json'},
+    headers:apiHeaders(),
     body:JSON.stringify({ system, user, model:cfg.model||'claude-sonnet-4-6' })
   });
+  if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadejte heslo znovu.'); }
   if(!res.ok){
     let msg=res.status+' '+res.statusText;
     try{ const j=await res.json(); if(j.error) msg=j.error; }catch(e){}
@@ -1665,6 +1696,20 @@ function resetAll(){
 }
 function renderAll(){ renderDocs(); renderLang(); renderEditor(); renderNav(); if(tab==='preview') renderReport(); if(tab==='settings') renderDocsSettings(); }
 
+/* ============================================================ VSTUPNÍ BRÁNA (heslo) ============================================================ */
+function apiHeaders(){ return { 'content-type':'application/json', 'x-access': localStorage.getItem('vz_access')||'' }; }
+function showGate(){ const g=document.getElementById('gate'); if(g){ g.style.display='flex'; const i=document.getElementById('gatepw'); if(i){ i.value=''; setTimeout(()=>i.focus(),50); } } }
+function hideGate(){ const g=document.getElementById('gate'); if(g) g.style.display='none'; }
+function on401(){ localStorage.removeItem('vz_access'); showGate(); }
+async function doAuth(){
+  const pw=(document.getElementById('gatepw').value||''); const err=document.getElementById('gateerr'); if(err) err.textContent='';
+  try{
+    const r=await fetch('/api/auth',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({password:pw}) });
+    if(r.ok){ const j=await r.json(); if(j.ok){ localStorage.setItem('vz_access',pw); hideGate(); return; } }
+    if(err) err.textContent='Chybné heslo.';
+  }catch(e){ localStorage.setItem('vz_access', pw||'local'); hideGate(); } // lokální náhled bez backendu
+}
+
 /* ============================================================ EVENT DELEGATION (CSP-safe) ============================================================ */
 document.addEventListener('click', e=>{
   const el=e.target.closest('[data-act]'); if(!el) return;
@@ -1725,6 +1770,10 @@ if(data.orgType){ const vis=visibleChapters(); if(!vis.find(c=>c.id===activeChap
 applyBrand();
 renderAll();
 hydrateAssets();
+/* vstupní brána */
+document.getElementById('gatebtn').addEventListener('click', doAuth);
+document.getElementById('gatepw').addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth(); });
+if(!localStorage.getItem('vz_access')) showGate();
 </script>
 </body>
 </html>
