@@ -418,6 +418,7 @@
     <div class="spacer"></div>
     <div class="docbar noprint">
       <select id="docselect" title="Přepnout zprávu"></select>
+      <button class="btn small" id="deldocbtn" data-act="deldocCurrent" title="Smazat vybranou zprávu" aria-label="Smazat vybranou zprávu" style="color:#b00"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
       <button class="btn small primary" data-act="newdoc">+ Nová zpráva</button>
     </div>
     <span id="savestatus" class="savestatus noprint"></span>
@@ -468,9 +469,12 @@
 
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
       <h3 style="margin:0 0 6px">Tvoje zprávy</h3>
-      <p class="keyhint" style="margin:0 0 12px">Můžeš mít rozpracovaných víc zpráv (např. pro různé organizace) a kdykoli se k nim vrátit. Přejmenuj je přímo v políčku.</p>
+      <p class="keyhint" style="margin:0 0 12px">Můžeš mít rozpracovaných víc zpráv (např. pro různé organizace) a kdykoli se k nim vrátit. Přejmenuj je přímo v políčku, smaž je košem. Testovací úklid: „Smazat prázdné zprávy" odebere všechny nevyplněné najednou.</p>
       <div id="docsmgr"></div>
-      <button class="btn" data-act="newdoc" style="margin-top:12px">+ Nová zpráva</button>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" data-act="newdoc">+ Nová zpráva</button>
+        <button class="btn ghost" data-act="cleanupDocs" style="color:#b00"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Smazat prázdné zprávy</button>
+      </div>
 
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0" />
       <h3 style="margin:0 0 10px">Data a zálohy</h3>
@@ -744,10 +748,34 @@ function deleteDoc(id){
   activeChapter='organizace'; applyBrand(); renderAll(); hydrateAssets(); renderDocsSettings(); toast('Zpráva smazána.');
 }
 function renameDoc(id,name){ const it=docs.list.find(x=>x.id===id); if(it){ it.name=(name||'').trim()||'Bez názvu'; localStorage.setItem(LS_DOCS, JSON.stringify(docs)); renderDocs(); } }
+function isDocEmpty(d){
+  if(!d) return true;
+  if((d.orgType||'').toString().trim()) return false;
+  if((d.assets||[]).length) return false;
+  const chs=d.chapters||{};
+  for(const k in chs){ const ch=chs[k]||{}; for(const kk in ch){ if(kk==='rok') continue; // rok je předvyplněný
+    const v=ch[kk]; if(Array.isArray(v)){ if(v.length) return false; } else if((v||'').toString().trim()) return false; } }
+  return true;
+}
+function cleanupEmptyDocs(){
+  const emptyIds=docs.list.filter(it=>isDocEmpty(loadDoc(it.id))).map(it=>it.id);
+  let removable=emptyIds;
+  if(removable.length===docs.list.length) removable=removable.slice(1); // nech aspoň jednu zprávu
+  if(!removable.length){ toast('Žádné prázdné zprávy k odebrání.'); return; }
+  if(!confirm('Odebrat '+removable.length+' prázdných (nevyplněných) zpráv? Zprávy s obsahem zůstanou.')) return;
+  const rem=new Set(removable);
+  removable.forEach(id=>{ try{ const dd=loadDoc(id); (dd.assets||[]).forEach(a=>IDB.del(a.id)); }catch(e){} localStorage.removeItem(DOC_PREFIX+id); });
+  docs.list=docs.list.filter(x=>!rem.has(x.id));
+  if(rem.has(docs.currentId)){ docs.currentId=docs.list[0].id; data=hydrateDoc(loadDoc(docs.currentId)); activeChapter='organizace'; }
+  localStorage.setItem(LS_DOCS, JSON.stringify(docs));
+  applyBrand(); renderAll(); hydrateAssets(); renderDocsSettings(); toast('Odebráno prázdných zpráv: '+removable.length+' ✓');
+}
 
 function renderDocs(){
   const sel=document.getElementById('docselect'); if(!sel) return;
-  sel.style.display = docs.list.length>1 ? '' : 'none'; // při jediné zprávě nemá smysl přepínač
+  const many = docs.list.length>1;
+  sel.style.display = many ? '' : 'none'; // při jediné zprávě nemá smysl přepínač
+  const del=document.getElementById('deldocbtn'); if(del) del.style.display = many ? '' : 'none';
   sel.innerHTML=docs.list.map(d=>`<option value="${d.id}" ${d.id===docs.currentId?'selected':''}>${esc(d.name||'Bez názvu')}</option>`).join('');
 }
 function renderLang(){
@@ -1855,6 +1883,8 @@ document.addEventListener('click', e=>{
     case 'expand': expand(el.dataset.arg, +el.dataset.pct); break;
     case 'expandProj': expandProj(el.dataset.ch, +el.dataset.i, +el.dataset.pct); break;
     case 'newdoc': newDoc(); break;
+    case 'deldocCurrent': deleteDoc(docs.currentId); break;
+    case 'cleanupDocs': cleanupEmptyDocs(); break;
     case 'opendoc': switchDoc(el.dataset.id); break;
     case 'deldoc': deleteDoc(el.dataset.id); break;
     case 'lang': setLang(el.dataset.arg); break;
