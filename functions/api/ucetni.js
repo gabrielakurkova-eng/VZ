@@ -1,4 +1,5 @@
-// POST /api/finance → z účetních výkazů vytáhne klíčové údaje + komentář. Claude (Sonnet) s fallbackem na Gemini.
+// POST /api/ucetni → z účetní závěrky a zprávy auditora doplní texty do polí Závěrka a Výrok auditora.
+// Claude (Sonnet) s fallbackem na Gemini. Vrací POUZE JSON {zaverka, audit}.
 const GEMINI_MODEL = 'gemini-2.0-flash';
 
 export async function onRequestPost(context) {
@@ -8,9 +9,10 @@ export async function onRequestPost(context) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'Neplatný JSON.' }, 400); }
   const files = Array.isArray(body.files) ? body.files.slice(0, 12) : [];
-  if (!files.length) return json({ error: 'Chybí účetní výkazy.' }, 400);
+  if (!files.length) return json({ error: 'Chybí dokumenty.' }, 400);
+  const rok = String(body.rok || '').replace(/[^0-9./ ]/g, '').trim();
 
-  const intro = 'Níže jsou účetní výkazy organizace (rozvaha, výkaz zisku a ztráty / výsledovka, příloha k účetní závěrce apod.).';
+  const intro = 'Níže jsou dokumenty k účetní závěrce organizace (rozvaha, výkaz zisku a ztráty, příloha k účetní závěrce) a případně zpráva auditora.';
   const aContent = [{ type: 'text', text: intro }];
   const gParts = [{ text: intro }];
   for (const f of files) {
@@ -22,38 +24,35 @@ export async function onRequestPost(context) {
     else if (mime === 'application/pdf') { aContent.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: f.dataB64 } }); gParts.push({ inline_data: { mime_type: 'application/pdf', data: f.dataB64 } }); }
     else { try { const t = atob(f.dataB64).slice(0, 20000); aContent.push({ type: 'text', text: t }); gParts.push({ text: t }); } catch (e) {} }
   }
-  aContent.push({ type: 'text', text: TASK });
-  gParts.push({ text: TASK });
+  const task = buildTask(rok);
+  aContent.push({ type: 'text', text: task });
+  gParts.push({ text: task });
 
-  const system = 'Jsi účetní asistent. Z výkazů vytěžíš klíčové finanční údaje. Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš, co nelze určit, necháš prázdné. Komentář piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů; nepoužívej dlouhé pomlčky (em dash).';
+  const system = 'Jsi účetní asistent. Z dokumentů sestavíš krátké texty do výroční zprávy. Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš (jména, data, výroky) co v dokumentech není. Piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů; nepoužívej dlouhé pomlčky (em dash).';
 
   let lastErr = '';
   if (env.ANTHROPIC_API_KEY) {
-    const a = await tryAnthropic(env.ANTHROPIC_API_KEY, 'claude-sonnet-4-6', system, aContent, 1500);
+    const a = await tryAnthropic(env.ANTHROPIC_API_KEY, 'claude-sonnet-4-6', system, aContent, 900);
     if (a.ok) { const p = parseJSON(a.text); if (p) return json({ result: p, provider: 'claude' }); lastErr = 'Claude vrátil nevalidní JSON'; }
     else lastErr = a.error || ('Claude ' + a.status);
     if (!env.GEMINI_API_KEY) return json({ error: lastErr }, 502);
   }
   if (env.GEMINI_API_KEY) {
-    const g = await tryGemini(env.GEMINI_API_KEY, system, gParts, 1500, true);
+    const g = await tryGemini(env.GEMINI_API_KEY, system, gParts, 900, true);
     if (g.ok) { const p = parseJSON(g.text); if (p) return json({ result: p, provider: 'gemini' }); return json({ error: 'Gemini vrátil nevalidní JSON.' }, 502); }
     return json({ error: 'Claude i Gemini selhaly. ' + (lastErr ? '(Claude: ' + lastErr + ') ' : '') + '(Gemini: ' + (g.error || '') + ')' }, g.status || 502);
   }
   return json({ error: lastErr || 'Žádný poskytovatel není dostupný.' }, 502);
 }
 
-const TASK = `\nÚkol: Vrať POUZE validní JSON přesně v této struktuře. Číselná pole (příjmy, výdaje) uváděj jako celá čísla v Kč bez mezer a měny (např. 450000). Co z výkazů nelze určit, nech jako prázdný řetězec.
-
-Do "commentary" napiš 1–2 odstavce shrnující hospodaření za rok s nejdůležitějšími čísly (celkové výnosy a náklady, výsledek hospodaření, hlavní zdroje a položky), věcně a srozumitelně, bez frází.
-
-Do "majetek" napiš stručné shrnutí ROZVAHY jako souvislý text v tomto stylu a pořadí (datum a hodnoty převezmi z rozvahy, k rozvahovému dni, tj. poslednímu dni účetního období):
-"Aktiva celkem k 31. 12. <rok>: <X> tis. Kč (krátkodobý finanční majetek: <…> tis. Kč, pohledávky: <…> tis. Kč). Vlastní zdroje: <…> tis. Kč. Cizí zdroje: <…> tis. Kč (krátkodobé závazky: <…> tis. Kč, jiná pasiva: <…> tis. Kč). Podrobné výkazy jsou uvedeny v příloze."
-Pravidla pro "majetek": částky zaokrouhli na celé tisíce Kč a vždy uveď „tis. Kč"; uváděj jen ty položky, které v rozvaze skutečně jsou (ostatní vynech), a na zbytek odkaž větou „Podrobné výkazy jsou uvedeny v příloze."; nevymýšlej si položky ani čísla. Pokud rozvaha mezi výkazy není, nech "majetek" jako prázdný řetězec.
-
-{
- "fields": {"prijmy_dotace":"","prijmy_dary":"","prijmy_vlastni":"","prijmy_ostatni":"","vydaje_provoz":"","vydaje_mzdy":"","vydaje_projekty":"","vydaje_ostatni":"","majetek":""},
- "commentary": ""
-}`;
+function buildTask(rok) {
+  const rokTxt = rok ? ('za rok ' + rok) : 'za uplynulý rok';
+  return `\nÚkol: Vrať POUZE validní JSON přesně v této struktuře:
+{"zaverka":"", "audit":""}
+- "zaverka": 1 až 2 věty konstatující, že účetní závěrka ${rokTxt} (rozvaha, výkaz zisku a ztráty a příloha) je v plném znění uvedena v přílohách této výroční zprávy. Pokud z dokumentů plyne konkrétní den sestavení nebo rozvahový den, uveď ho.
+- "audit": Pokud je mezi dokumenty zpráva auditora, napiš 1 až 2 věty s typem výroku (např. „výrok bez výhrad"), jménem auditora nebo auditorské společnosti a datem, jsou-li uvedeny, a doplň, že úplná zpráva auditora je uvedena v příloze. Pokud zpráva auditora mezi dokumenty není, nech "audit" jako prázdný řetězec.
+Piš věcně, v 1. osobě množného čísla tam, kde to dává smysl, spisovnou češtinou bez frází a bez dlouhých pomlček (em dash). Nevymýšlej si údaje, které v dokumentech nejsou.`;
+}
 
 async function tryAnthropic(key, model, system, content, maxTokens) {
   try {

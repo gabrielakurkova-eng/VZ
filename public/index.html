@@ -892,7 +892,7 @@ function renderChapter(c){
   if(c.projects) inner += projectsHTML(c);
   if(c.narrative) inner += narrativeHTML(c);
   const media = chapterMediaHTML(c);
-  const mediaTop = (c.id==='finance'); // u hospodaření patří výkazy/přílohy na začátek
+  const mediaTop = (c.id==='finance'||c.id==='ucetni'); // výkazy/dokumenty patří na začátek kapitoly
   return `<div class="panel">
     <div class="row" style="justify-content:space-between"><h2><span class="hico">${icon(c.ico)}</span>${c.label}</h2>${pill}</div>
     <p class="lead">${c.lead}</p>
@@ -905,7 +905,12 @@ function renderChapter(c){
   </div>`;
 }
 function chapterMediaHTML(c){
-  if(c.id==='finance') return financeDocsHTML(c);
+  if(c.id==='finance') return docsBlockHTML('finance',{ ico:'barchart', title:'Účetní výkazy a přílohy',
+    intro:'Nahraj rozvahu, výsledovku, přílohu k účetní závěrce, výrok auditora apod. (PDF nebo sken). AI z nich vytáhne klíčové údaje do textu a kompletní výkazy přidá jako přílohy na konec PDF, jak vyžaduje zákon.',
+    uploadLabel:'Nahrát výkaz / přílohu', aiAct:'financeAI', aiLabel:'Vytáhnout klíčové údaje z výkazů', aiHint:'Doplní čísla a komentář k hospodaření.' });
+  if(c.id==='ucetni') return docsBlockHTML('ucetni',{ ico:'fileText', title:'Dokumenty k závěrce a auditu (přílohy)',
+    intro:'Nahraj účetní závěrku (rozvaha, výsledovka, příloha) a zprávu auditora (PDF nebo sken). AI z nich doplní údaje do polí výše a kompletní dokumenty přidá jako přílohy na konec PDF, jak vyžaduje zákon.',
+    uploadLabel:'Nahrát dokument / přílohu', aiAct:'ucetniAI', aiLabel:'Doplnit údaje z dokumentů', aiHint:'Vyplní pole Závěrka a Výrok auditora s odkazem na přílohy.' });
   const imgs=(data.assets||[]).filter(a=>isImg(a)&&a.chapter===c.id&&!a.appendix);
   const isDarci=c.id==='darci';
   const label=isDarci?'Loga partnerů / dárců':'Fotky / obrázky';
@@ -946,18 +951,18 @@ async function handleChapterFiles(chId, files){
   if(added){ persist(); renderEditor(); renderNav(); flashSaved(); toast('Přidáno ✓'); }
 }
 
-/* Hospodaření: účetní výkazy → údaje do textu + přílohy v PDF */
-function financeDocsHTML(c){
-  const atts=(data.assets||[]).filter(a=>a.chapter==='finance'&&a.kind==='attachment');
-  const rows=atts.map(a=>`<div class="docrow">${icon('fileText')}<span class="docname" title="${esc(a.name||'')}">${esc(a.name||'soubor')}</span><span class="pill opt">příloha</span><button class="btn ghost small" data-act="removeAsset" data-id="${a.id}" title="Odebrat">${icon('x')}</button></div>`).join('');
+/* Účetní dokumenty (výkazy / závěrka / audit) → údaje do textu + přílohy v PDF */
+function docsBlockHTML(chId, opt){
+  const atts=(data.assets||[]).filter(a=>a.chapter===chId&&a.kind==='attachment');
+  const rows=atts.map(a=>`<div class="docrow">${icon('fileText')}<span class="docname" title="${esc(a.name||'')}">${esc(a.name||'soubor')}</span><span class="pill opt">příloha</span><button class="btn ghost small" data-act="removeAsset" data-id="${a.id}" title="Odebrat přílohu" aria-label="Odebrat přílohu">${icon('x')}</button></div>`).join('');
   return `<div class="chmedia">
-    <div class="chmhead">${icon('barchart')} Účetní výkazy a přílohy</div>
-    <p class="muted" style="font-size:12.5px;margin:0 0 10px">Nahraj rozvahu, výsledovku, přílohu k účetní závěrce, výrok auditora apod. (PDF nebo sken). AI z nich vytáhne klíčové údaje do textu a kompletní výkazy přidá jako přílohy na konec PDF, jak vyžaduje zákon.</p>
-    <label class="chupload">${icon('uploadCloud')} <span>Nahrát výkaz / přílohu</span>
-      <input type="file" accept=".pdf,image/*,.xlsx,.xls" multiple data-chdoc="finance" style="display:none">
+    <div class="chmhead">${icon(opt.ico)} ${opt.title}</div>
+    <p class="muted" style="font-size:12.5px;margin:0 0 10px">${opt.intro}</p>
+    <label class="chupload">${icon('uploadCloud')} <span>${opt.uploadLabel}</span>
+      <input type="file" accept=".pdf,image/*,.xlsx,.xls" multiple data-chdoc="${chId}" style="display:none">
     </label>
     ${rows?`<div class="doclist">${rows}</div>`:''}
-    ${atts.length?`<div class="row" style="margin-top:12px"><button class="btn primary small" id="financeai" data-act="financeAI">${icon('sparkles')} Vytáhnout klíčové údaje z výkazů</button><span class="muted" style="font-size:12px">Doplní čísla a komentář k hospodaření.</span></div>`:''}
+    ${atts.length&&opt.aiAct?`<div class="row" style="margin-top:12px"><button class="btn primary small" data-act="${opt.aiAct}">${icon('sparkles')} ${opt.aiLabel}</button><span class="muted" style="font-size:12px">${opt.aiHint}</span></div>`:''}
   </div>`;
 }
 async function handleChapterDocs(chId, files){
@@ -974,7 +979,7 @@ async function handleChapterDocs(chId, files){
 async function financeAI(){
   const atts=(data.assets||[]).filter(a=>a.chapter==='finance'&&a.kind==='attachment');
   if(!atts.length){ toast('Nahraj nejdřív výkazy.'); return; }
-  const btn=document.getElementById('financeai'); setBusy(btn,true);
+  const btn=document.querySelector('[data-act="financeAI"]'); setBusy(btn,true);
   try{
     const files=[];
     for(const a of atts){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, dataB64:await blobToB64(b) }); }
@@ -986,6 +991,24 @@ async function financeAI(){
     ['prijmy_dotace','prijmy_dary','prijmy_vlastni','prijmy_ostatni','vydaje_provoz','vydaje_mzdy','vydaje_projekty','vydaje_ostatni','majetek'].forEach(k=>{ if(f[k]!=null && String(f[k]).trim()) setChapVal('finance',k,String(f[k])); });
     if(r.commentary && r.commentary.trim()) setChapVal('finance','text',r.commentary.trim());
     renderEditor(); renderNav(); flashSaved(); toast('Údaje z výkazů doplněny ✓');
+  }catch(e){ toast('Chyba: '+e.message); }
+  finally{ setBusy(btn,false); }
+}
+async function ucetniAI(){
+  const atts=(data.assets||[]).filter(a=>a.chapter==='ucetni'&&a.kind==='attachment');
+  if(!atts.length){ toast('Nahraj nejdřív dokumenty.'); return; }
+  const btn=document.querySelector('[data-act="ucetniAI"]'); setBusy(btn,true);
+  try{
+    const files=[];
+    for(const a of atts){ const b=await IDB.get(a.id); if(!b) continue; files.push({ id:a.id, name:a.name, mime:a.mime, dataB64:await blobToB64(b) }); }
+    if(!files.length) throw new Error('Soubory se nepodařilo načíst.');
+    const res=await fetch('/api/ucetni',{method:'POST',headers:apiHeaders(),body:JSON.stringify({files, rok:(chapVal('organizace','rok')||'')})});
+    if(res.status===401){ on401(); throw new Error('Vypršel přístup, zadej heslo znovu.'); }
+    if(!res.ok){ let m=res.status; try{const j=await res.json(); if(j.error)m=j.error;}catch(e){} throw new Error(m); }
+    const r=(await res.json()).result||{};
+    if(r.zaverka && r.zaverka.trim()) setChapVal('ucetni','zaverka',r.zaverka.trim());
+    if(r.audit && r.audit.trim()) setChapVal('ucetni','audit',r.audit.trim());
+    renderEditor(); renderNav(); flashSaved(); toast('Údaje z dokumentů doplněny ✓');
   }catch(e){ toast('Chyba: '+e.message); }
   finally{ setBusy(btn,false); }
 }
@@ -1701,7 +1724,7 @@ function renderReport(){
     if(sec) body+=sec+ph;
     else if(ph) body+=`<h2>${esc(chLabel(c))}</h2>`+ph;
   });
-  r.innerHTML=hero+cover+`<div class="body">${body}</div>`+appendixHTML();
+  r.innerHTML=hero+cover+`<div class="body">${body}${appendixHTML()}</div>`;
 }
 function sectionOrg(og){
   const o=orgType();
@@ -1849,6 +1872,7 @@ document.addEventListener('click', e=>{
     case 'addPerson': addPerson(el.dataset.ch); break;
     case 'delPerson': delPerson(el.dataset.ch, +el.dataset.i); break;
     case 'financeAI': financeAI(); break;
+    case 'ucetniAI': ucetniAI(); break;
     case 'delProjPhoto': delProjPhoto(el.dataset.ch, +el.dataset.i, +el.dataset.pi); break;
   }
 });
