@@ -358,8 +358,13 @@
     body{background:#fff}
     .app{max-width:none;padding:0}
     .noprint{display:none !important}
-    /* vynutit tisk barev a přechodů zprávy (zelené proužky, linka, tabulky) i bez „Grafiky na pozadí" */
+    /* vynutit tisk barev zprávy i bez „Grafiky na pozadí" */
     .report, .report *, .report *::before, .report *::after{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    /* přechody se v tisku často nevykreslí, proto je nahradíme plnou barvou (zelené proužky a linka) */
+    .report h2::before{background:var(--brand) !important}
+    .report .cover .rule{background:var(--brand) !important}
+    .report .cover .kicker{color:var(--brand) !important}
+    .report .fin tr:last-child td{background:var(--brand-soft) !important}
     .report{border:0;box-shadow:none;border-radius:0;max-width:none;margin:0;padding:0}
     .report .cover{background:#fff !important;border-bottom:2px solid var(--rbrand,var(--brand));padding:0 0 28px;margin-bottom:24px}
     .report .cover-logo{background:#fff}
