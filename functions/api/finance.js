@@ -9,6 +9,7 @@ export async function onRequestPost(context) {
   try { body = await request.json(); } catch (e) { return json({ error: 'Neplatný JSON.' }, 400); }
   const files = Array.isArray(body.files) ? body.files.slice(0, 12) : [];
   if (!files.length) return json({ error: 'Chybí účetní výkazy.' }, 400);
+  const rok = String(body.rok || '').replace(/[^0-9./ ]/g, '').trim();
 
   const intro = 'Níže jsou účetní výkazy organizace (rozvaha, výkaz zisku a ztráty / výsledovka, příloha k účetní závěrce apod.).';
   const aContent = [{ type: 'text', text: intro }];
@@ -22,10 +23,11 @@ export async function onRequestPost(context) {
     else if (mime === 'application/pdf') { aContent.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: f.dataB64 } }); gParts.push({ inline_data: { mime_type: 'application/pdf', data: f.dataB64 } }); }
     else { try { const t = atob(f.dataB64).slice(0, 20000); aContent.push({ type: 'text', text: t }); gParts.push({ text: t }); } catch (e) {} }
   }
-  aContent.push({ type: 'text', text: TASK });
-  gParts.push({ text: TASK });
+  const task = buildTask(rok);
+  aContent.push({ type: 'text', text: task });
+  gParts.push({ text: task });
 
-  const system = 'Jsi účetní asistent. Z výkazů vytěžíš klíčové finanční údaje. Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš, co nelze určit, necháš prázdné. Komentář piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů; nepoužívej dlouhé pomlčky (em dash).';
+  const system = 'Jsi účetní asistent. Z účetních výkazů a dokumentů vytěžíš klíčové finanční údaje a sestavíš krátké texty do výroční zprávy (hospodaření i účetní závěrka a audit). Vracíš POUZE JSON dle zadané struktury. Nic si nevymýšlíš (čísla, jména, data, výroky, položky), co nelze z dokumentů určit, necháš prázdné. Texty piš přirozenou, gramaticky správnou češtinou bez frází a AI obratů; nepoužívej dlouhé pomlčky (em dash).';
 
   let lastErr = '';
   if (env.ANTHROPIC_API_KEY) {
@@ -42,18 +44,27 @@ export async function onRequestPost(context) {
   return json({ error: lastErr || 'Žádný poskytovatel není dostupný.' }, 502);
 }
 
-const TASK = `\nÚkol: Vrať POUZE validní JSON přesně v této struktuře. Číselná pole (příjmy, výdaje) uváděj jako celá čísla v Kč bez mezer a měny (např. 450000). Co z výkazů nelze určit, nech jako prázdný řetězec.
+function buildTask(rok) {
+  const rokTxt = rok ? ('za rok ' + rok) : 'za uplynulý rok';
+  return `\nÚkol: Vrať POUZE validní JSON přesně v této struktuře. Číselná pole (příjmy, výdaje) uváděj jako celá čísla v Kč bez mezer a měny (např. 450000). Co z dokumentů nelze určit, nech jako prázdný řetězec.
 
-Do "commentary" napiš 1–2 odstavce shrnující hospodaření za rok s nejdůležitějšími čísly (celkové výnosy a náklady, výsledek hospodaření, hlavní zdroje a položky), věcně a srozumitelně, bez frází.
+Do "commentary" napiš 1–2 odstavce shrnující hospodaření ${rokTxt} s nejdůležitějšími čísly (celkové výnosy a náklady, výsledek hospodaření, hlavní zdroje a položky), věcně a srozumitelně, bez frází.
 
 Do "majetek" napiš stručné shrnutí ROZVAHY jako souvislý text v tomto stylu a pořadí (datum a hodnoty převezmi z rozvahy, k rozvahovému dni, tj. poslednímu dni účetního období):
 "Aktiva celkem k 31. 12. <rok>: <X> tis. Kč (krátkodobý finanční majetek: <…> tis. Kč, pohledávky: <…> tis. Kč). Vlastní zdroje: <…> tis. Kč. Cizí zdroje: <…> tis. Kč (krátkodobé závazky: <…> tis. Kč, jiná pasiva: <…> tis. Kč). Podrobné výkazy jsou uvedeny v příloze."
-Pravidla pro "majetek": částky zaokrouhli na celé tisíce Kč a vždy uveď „tis. Kč"; uváděj jen ty položky, které v rozvaze skutečně jsou (ostatní vynech), a na zbytek odkaž větou „Podrobné výkazy jsou uvedeny v příloze."; nevymýšlej si položky ani čísla. Pokud rozvaha mezi výkazy není, nech "majetek" jako prázdný řetězec.
+Pravidla pro "majetek": částky zaokrouhli na celé tisíce Kč a vždy uveď „tis. Kč"; uváděj jen ty položky, které v rozvaze skutečně jsou (ostatní vynech), a na zbytek odkaž větou „Podrobné výkazy jsou uvedeny v příloze."; nevymýšlej si položky ani čísla. Pokud rozvaha mezi dokumenty není, nech "majetek" prázdné.
+
+Do "zaverka" napiš 1 až 2 věty konstatující, že účetní závěrka ${rokTxt} (rozvaha, výkaz zisku a ztráty a příloha) je v plném znění uvedena v přílohách této výroční zprávy; pokud z dokumentů plyne rozvahový den nebo den sestavení, uveď ho.
+
+Do "audit": Pokud je mezi dokumenty zpráva auditora, napiš 1 až 2 věty s typem výroku (např. „výrok bez výhrad"), jménem auditora nebo auditorské společnosti a datem, jsou-li uvedeny, a doplň, že úplná zpráva auditora je uvedena v příloze. Pokud zpráva auditora mezi dokumenty není, nech "audit" jako prázdný řetězec.
 
 {
  "fields": {"prijmy_dotace":"","prijmy_dary":"","prijmy_vlastni":"","prijmy_ostatni":"","vydaje_provoz":"","vydaje_mzdy":"","vydaje_projekty":"","vydaje_ostatni":"","majetek":""},
- "commentary": ""
+ "commentary": "",
+ "zaverka": "",
+ "audit": ""
 }`;
+}
 
 async function tryAnthropic(key, model, system, content, maxTokens) {
   try {
